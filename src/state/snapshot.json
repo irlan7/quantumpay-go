@@ -1,0 +1,12 @@
+{
+  "height": 1200,
+  "hash": "000abc...",
+  "timestamp": 1765780000000,
+  "balances": { "addr1": 150 },
+  "nonces": { "addr1": 5 },
+  "contracts": {},
+  "snapshotHash": "9fa31c...",
+  "signature": "304502...",
+  "signer": "04ab12..."
+}
+

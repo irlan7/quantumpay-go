@@ -1,0 +1,42 @@
+{
+  "network": {
+    "name": "Quantum Network",
+    "chainId": 777777,
+    "genesisTime": "2025-01-01T00:00:00Z"
+  },
+
+  "consensus": {
+    "type": "pos-bft",
+    "blockTimeSeconds": 5,
+    "finality": {
+      "threshold": "2/3",
+      "mode": "strict"
+    }
+  },
+
+  "economics": {
+    "maxSupply": 210000000,
+    "decimals": 8,
+    "baseFee": 1,
+    "feeSplit": {
+      "burn": 0.30,
+      "validator": 0.60,
+      "treasury": 0.10
+    }
+  },
+
+  "validators": [
+    {
+      "address": "qpval1...",
+      "pubKey": "PUBKEY_NODE1",
+      "stake": 1000000
+    }
+  ],
+
+  "state": {
+    "height": 0,
+    "finalizedHeight": 0,
+    "balances": {}
+  }
+}
+

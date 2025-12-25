@@ -1,0 +1,18 @@
+{
+  "forkHeight": 120,
+  "forkHash": "9af31c",
+  "detectedAt": "2025-12-19T12:40:00Z",
+  "reason": "Invalid prevHash detected",
+  "canonicalTip": "0000ab9c...",
+  "forkedChain": [
+    {
+      "index": 120,
+      "hash": "9af31c...",
+      "prevHash": "88de21...",
+      "timestamp": 1734599999,
+      "transactions": []
+    }
+  ],
+  "resolution": "rolled-back"
+}
+

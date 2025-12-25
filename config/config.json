@@ -1,0 +1,21 @@
+{
+  "network": {
+    "chainId": "quantumpay-testnet",
+    "genesisTime": 1700000000,
+    "blockTime": 5,
+    "epochLength": 120960
+  },
+  "consensus": {
+    "type": "PoS-BFT",
+    "validators": 3,
+    "finalityThreshold": 0.67
+  },
+  "staking": {
+    "minStake": 100000,
+    "maxEffectiveStakePercent": 10
+  },
+  "paths": {
+    "dataDir": "./data"
+  }
+}
+

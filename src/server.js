@@ -1,52 +1,35 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const Blockchain = require("./blockchain/blockchain");
+const Voting = require("./consensus/voting");
+const Finality = require("./consensus/finality");
 
-const Blockchain = require('./blockchain/blockchain');
-const Transaction = require('./blockchain/transaction');
+const NODE_ID = process.env.NODE_ID || "node1";
+const DATA_DIR = `data/${NODE_ID}`;
 
-const P2PServer = require('./p2p/p2p-server');
+const validators = ["node1", "node2", "node3"];
 
-const HTTP_PORT = process.env.HTTP_PORT || 3001;
-const P2P_PORT = process.env.P2P_PORT || 6001;
+const log = (msg) => console.log(msg);
 
-const app = express();
-app.use(bodyParser.json());
-
-const blockchain = new Blockchain();
-const p2pServer = new P2PServer(blockchain);
-
-/**
- * Create new transaction (with signature verification)
- */
-app.post('/transactions/new', (req, res) => {
-  try {
-    const { from, to, amount, signature } = req.body;
-
-    const tx = new Transaction(from, to, amount, signature);
-
-    if (!tx.isValid()) {
-      return res.status(400).json({ error: 'Invalid signature' });
-    }
-
-    blockchain.addTransaction(tx);
-    p2pServer.broadcastTransaction(tx);
-
-    res.json({ message: 'Transaction accepted', tx });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+const voting = new Voting({
+  nodeId: NODE_ID,
+  validators,
+  logger: log,
 });
 
-/**
- * Get blockchain
- */
-app.get('/blocks', (req, res) => {
-  res.json(blockchain.chain);
+const blockchain = new Blockchain({
+  nodeId: NODE_ID,
+  voting,
+  finality: new Finality({
+    state: { finalizedHeight: 0 },
+    dataDir: DATA_DIR,
+    logger: log,
+  }),
+  logger: log,
 });
 
-app.listen(HTTP_PORT, () => {
-  console.log(`HTTP server listening on port ${HTTP_PORT}`);
-});
+log(`[BOOT] Starting QuantumPay node: ${NODE_ID}`);
+log(`[READY] Node ${NODE_ID} is running`);
 
-p2pServer.listen(P2P_PORT);
+setInterval(() => {
+  blockchain.produceBlock();
+}, 5000);
 

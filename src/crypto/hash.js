@@ -1,7 +1,15 @@
 const crypto = require('crypto');
 
-const hash = (data) =>
-  crypto.createHash('sha256').update(data).digest('hex');
+const DOMAIN = 'QuantumPay-Block';
 
-module.exports = { hash };
+const cryptoHash = (...inputs) => {
+  const hash = crypto.createHash('sha256');
+  hash.update(
+    DOMAIN +
+    inputs.map(i => JSON.stringify(i)).join('|')
+  );
+  return hash.digest('hex');
+};
+
+module.exports = cryptoHash;
 
