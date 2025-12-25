@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Runtime data (chain state, blocks, peers)
+data/
+data-*/
+state/
+blocks/
+
+# Logs
+*.log
+logs/
+
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build / temp
+dist/
+build/
+tmp/
+.cache/
+
+# Test artifacts
+coverage/
+
+# Backup files
+*.bak
+*.old
+*.swp
+
