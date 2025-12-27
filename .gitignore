@@ -38,3 +38,5 @@ coverage/
 *.old
 *.swp
 
+data/
+node_modules/
