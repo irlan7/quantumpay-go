@@ -1,31 +1,31 @@
-// src/consensus/finality.js
-
-const fs = require("fs");
-const path = require("path");
-
 class Finality {
-  constructor({ state, dataDir, logger }) {
+  constructor(state, slashing) {
     this.state = state;
-    this.dataDir = dataDir;
-    this.logger = logger;
+    this.slashing = slashing;
   }
 
-  finalize(height) {
-    if (this.state.finalizedHeight >= height) return;
+  checkVote(vote) {
+    const finalized = this.state.finalizedHeight;
 
-    this.state.finalizedHeight = height;
-    this.persist();
-
-    this.logger(
-      `[FINALITY] Block #${height} finalized (soft-enforce)`
-    );
+    if (
+      finalized !== null &&
+      vote.height <= finalized
+    ) {
+      this.slashing.onFinalizedViolation(vote.validatorId);
+      throw new Error(
+        `FATAL: Vote below finalized height (${finalized})`
+      );
+    }
   }
 
-  persist() {
-    const file = path.join(this.dataDir, "chain", "state.json");
-
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify(this.state, null, 2));
+  updateFinalized(height) {
+    if (
+      this.state.finalizedHeight === null ||
+      height > this.state.finalizedHeight
+    ) {
+      this.state.finalizedHeight = height;
+      console.log(`[FINALITY] Finalized height = ${height}`);
+    }
   }
 }
 

@@ -1,19 +1,44 @@
 {
   "network": {
-    "chainId": "quantumpay-testnet",
+    "name": "Quantum Network",
+    "chainId": "quantumpay-mainnet",
     "genesisTime": 1700000000,
     "blockTime": 5,
     "epochLength": 120960
   },
+
   "consensus": {
     "type": "PoS-BFT",
     "validators": 3,
-    "finalityThreshold": 0.67
+    "finalityThreshold": 0.67,
+    "finalityMode": "strict",
+    "preventForkBelowFinalized": true
   },
+
+  "slashing": {
+    "mode": "strict",
+    "doubleSign": {
+      "slashPercent": 50,
+      "jail": true,
+      "permanent": true
+    },
+    "finalizedViolation": {
+      "slashPercent": 100,
+      "jail": true,
+      "permanent": true
+    },
+    "downtime": {
+      "maxMissedBlocks": 50,
+      "slashPercent": 5,
+      "jailBlocks": 500
+    }
+  },
+
   "staking": {
     "minStake": 100000,
     "maxEffectiveStakePercent": 10
   },
+
   "paths": {
     "dataDir": "./data"
   }
