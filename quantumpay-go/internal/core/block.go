@@ -3,10 +3,9 @@ package core
 import (
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/hex"
 )
 
-// Block adalah unit immutable di blockchain
+// Block merepresentasikan blok immutable di QuantumPay
 type Block struct {
 	Height       uint64
 	PrevHash     []byte
@@ -15,25 +14,27 @@ type Block struct {
 	Hash         []byte
 }
 
-// NewBlock membuat block baru dan menghitung hash
+// NewBlock membuat block baru dan langsung menghitung hash
 func NewBlock(
 	height uint64,
 	prevHash []byte,
 	txs []*Transaction,
 	timestamp uint64,
 ) *Block {
+
 	b := &Block{
 		Height:       height,
 		PrevHash:     prevHash,
 		Transactions: txs,
 		Timestamp:    timestamp,
 	}
-	b.Hash = b.computeHash()
+
+	b.Hash = b.calculateHash()
 	return b
 }
 
-// computeHash → deterministic block hash
-func (b *Block) computeHash() []byte {
+// calculateHash menghitung hash block secara deterministik
+func (b *Block) calculateHash() []byte {
 	h := sha256.New()
 
 	// Height
@@ -41,22 +42,17 @@ func (b *Block) computeHash() []byte {
 	binary.BigEndian.PutUint64(buf, b.Height)
 	h.Write(buf)
 
-	// Prev hash
+	// PrevHash
 	h.Write(b.PrevHash)
-
-	// Transaction hashes
-	for _, tx := range b.Transactions {
-		h.Write(tx.Hash()) // ✅ FIX UTAMA
-	}
 
 	// Timestamp
 	binary.BigEndian.PutUint64(buf, b.Timestamp)
 	h.Write(buf)
 
-	return h.Sum(nil)
-}
+	// Transactions
+	for _, tx := range b.Transactions {
+		h.Write(tx.Hash())
+	}
 
-// HashHex helper (RPC / debug)
-func (b *Block) HashHex() string {
-	return hex.EncodeToString(b.Hash)
+	return h.Sum(nil)
 }

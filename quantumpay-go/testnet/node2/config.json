@@ -1,0 +1,8 @@
+{
+  "node_name": "node2",
+  "chain_id": 777777,
+  "p2p_port": 7002,
+  "rpc_port": 8082,
+  "data_dir": "./testnet/node2/data",
+  "peers": ["127.0.0.1:7001"]
+}
