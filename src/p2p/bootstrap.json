@@ -1,8 +1,0 @@
-{
-  "chainId": "quantumpay-mainnet",
-  "bootstraps": [
-    "ws://127.0.0.1:6001",
-    "ws://127.0.0.1:6002"
-  ]
-}
-
