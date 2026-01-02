@@ -7,36 +7,25 @@ import (
 	"github.com/irlan/quantumpay-go/internal/mempool"
 )
 
-type ChainView interface {
-	Height() uint64
-	TipHash() []byte
-}
-
 type Builder struct {
-	view    ChainView
-	mempool *mempool.Mempool
+	view ChainView
+	mp   *mempool.Mempool
 }
 
 func NewBuilder(view ChainView, mp *mempool.Mempool) *Builder {
 	return &Builder{
-		view:    view,
-		mempool: mp,
+		view: view,
+		mp:   mp,
 	}
 }
 
-func (b *Builder) Build() (*core.Block, error) {
-	parentHash := b.view.TipHash()
-	height := b.view.Height() + 1
-	timestamp := uint64(time.Now().Unix())
+func (b *Builder) Build() *core.Block {
+	txs := b.mp.PopAll()
 
-	txs := b.mempool.PopAll()
-
-	block := core.NewBlock(
-		height,
-		parentHash,
+	return core.NewBlock(
+		b.view.Height()+1,
+		b.view.LastHash(),
 		txs,
-		timestamp,
+		uint64(time.Now().Unix()),
 	)
-
-	return block, nil
 }

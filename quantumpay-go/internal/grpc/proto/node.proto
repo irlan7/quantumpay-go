@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package quantumpay.grpc;
+
+option go_package = "github.com/irlan/quantumpay-go/internal/grpc/proto;proto";
+
+service NodeService {
+  rpc GetStatus (Empty) returns (NodeStatus);
+}
+
+message Empty {}
+
+message NodeStatus {
+  uint64 height = 1;
+  string last_hash = 2;
+}
