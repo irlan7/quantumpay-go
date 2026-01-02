@@ -1,47 +1,91 @@
 package blockchain
 
-import "github.com/irlan/quantumpay-go/internal/core"
+import (
+	"errors"
+	"sync"
 
+	"github.com/irlan/quantumpay-go/internal/core"
+)
+
+var (
+	ErrEmptyChain = errors.New("blockchain is empty")
+)
+
+/*
+Blockchain
+- hanya menyimpan urutan block
+- tidak tahu state
+- tidak tahu executor
+- pure chain storage
+*/
 type Blockchain struct {
+	mu     sync.RWMutex
 	blocks []*core.Block
 }
 
+// NewBlockchain creates empty chain
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
 		blocks: make([]*core.Block, 0),
 	}
 }
 
-func (bc *Blockchain) AddBlock(block *core.Block) {
-	bc.blocks = append(bc.blocks, block)
+// AddBlock appends block to chain
+func (bc *Blockchain) AddBlock(b *core.Block) {
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
+	bc.blocks = append(bc.blocks, b)
 }
 
+// Height returns current chain height
 func (bc *Blockchain) Height() uint64 {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
 	return uint64(len(bc.blocks))
 }
 
-func (bc *Blockchain) LastBlock() *core.Block {
+// LastHash returns hash of last block
+func (bc *Blockchain) LastHash() []byte {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
 	if len(bc.blocks) == 0 {
 		return nil
 	}
-	return bc.blocks[len(bc.blocks)-1]
+	return bc.blocks[len(bc.blocks)-1].Hash
 }
 
-func (bc *Blockchain) LastHash() []byte {
-	last := bc.LastBlock()
-	if last == nil {
-		return nil
+// LastBlock returns last block
+func (bc *Blockchain) LastBlock() (*core.Block, error) {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
+	if len(bc.blocks) == 0 {
+		return nil, ErrEmptyChain
 	}
-	return last.Hash
+	return bc.blocks[len(bc.blocks)-1], nil
 }
 
-func (bc *Blockchain) GetBlockByHeight(h uint64) (*core.Block, bool) {
-	if h == 0 || h > uint64(len(bc.blocks)) {
-		return nil, false
+// GetBlockByHeight returns block at height (0-based)
+func (bc *Blockchain) GetBlockByHeight(h uint64) (*core.Block, error) {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
+	if h >= uint64(len(bc.blocks)) {
+		return nil, ErrEmptyChain
 	}
-	return bc.blocks[h-1], true
+	return bc.blocks[h], nil
 }
 
-func (bc *Blockchain) Blocks() []*core.Block {
-	return bc.blocks
+// GetBlockByHash scans chain for hash
+func (bc *Blockchain) GetBlockByHash(hash []byte) (*core.Block, error) {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
+	for _, b := range bc.blocks {
+		if string(b.Hash) == string(hash) {
+			return b, nil
+		}
+	}
+	return nil, ErrEmptyChain
 }
