@@ -1,18 +1,42 @@
 package block
 
-import "github.com/irlan/quantumpay-go/internal/core"
+import (
+	"time"
 
-type Builder struct{}
+	"github.com/irlan/quantumpay-go/internal/core"
+	"github.com/irlan/quantumpay-go/internal/mempool"
+)
 
-func NewBuilder() *Builder {
-	return &Builder{}
+type ChainView interface {
+	Height() uint64
+	TipHash() []byte
 }
 
-func (b *Builder) Build(
-	height uint64,
-	parentHash []byte,
-	txs []*core.Transaction,
-) *core.Block {
+type Builder struct {
+	view    ChainView
+	mempool *mempool.Mempool
+}
 
-	return core.NewBlock(height, parentHash, txs)
+func NewBuilder(view ChainView, mp *mempool.Mempool) *Builder {
+	return &Builder{
+		view:    view,
+		mempool: mp,
+	}
+}
+
+func (b *Builder) Build() (*core.Block, error) {
+	parentHash := b.view.TipHash()
+	height := b.view.Height() + 1
+	timestamp := uint64(time.Now().Unix())
+
+	txs := b.mempool.PopAll()
+
+	block := core.NewBlock(
+		height,
+		parentHash,
+		txs,
+		timestamp,
+	)
+
+	return block, nil
 }

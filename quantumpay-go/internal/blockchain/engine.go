@@ -1,7 +1,9 @@
 package blockchain
 
 import (
-	"github.com/irlan/quantumpay-go/internal/core"
+	"log"
+
+	"github.com/irlan/quantumpay-go/internal/block"
 	"github.com/irlan/quantumpay-go/internal/state"
 )
 
@@ -10,6 +12,7 @@ type Engine struct {
 	State *state.WorldState
 }
 
+// Constructor
 func NewEngine(chain *Blockchain, state *state.WorldState) *Engine {
 	return &Engine{
 		Chain: chain,
@@ -17,12 +20,27 @@ func NewEngine(chain *Blockchain, state *state.WorldState) *Engine {
 	}
 }
 
-func (e *Engine) ExecuteBlock(block *core.Block) error {
-	for _, tx := range block.Transactions {
-		if err := e.State.ApplyTransaction(tx); err != nil {
-			return err
-		}
+// Produce + execute + commit ONE block
+func (e *Engine) ProduceBlock() error {
+	view := NewChainView(e.Chain)
+
+	builder := block.NewBuilder(view, e.State)
+
+	newBlock, err := builder.Build()
+	if err != nil {
+		return err
 	}
-	e.Chain.AddBlock(block)
+
+	// Execute block
+	err = block.Execute(newBlock, e.State)
+	if err != nil {
+		return err
+	}
+
+	// Commit block
+	e.Chain.AddBlock(newBlock)
+
+	log.Printf("✅ Block committed. Height: %d\n", e.Chain.Height())
+
 	return nil
 }

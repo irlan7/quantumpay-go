@@ -3,111 +3,86 @@ package rpc
 import (
 	"encoding/json"
 	"log"
-	"net"
 	"net/http"
 	"strconv"
-	"sync"
-	"time"
 
 	"github.com/irlan/quantumpay-go/internal/blockchain"
 )
 
 type Server struct {
-	chain      *blockchain.Blockchain
-	addr       string
-	clients    map[string]int
-	mu         sync.Mutex
-	limit      int
-	window     time.Duration
+	chain *blockchain.Blockchain
+	addr  string
 }
 
 func NewServer(chain *blockchain.Blockchain, addr string) *Server {
 	return &Server{
-		chain:   chain,
-		addr:    addr,
-		clients: make(map[string]int),
-		limit:   60,               // 60 request
-		window:  time.Minute,      // per menit
+		chain: chain,
+		addr:  addr,
 	}
 }
 
 func (s *Server) Start() {
-	go s.resetLimiter()
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/status", s.withLimit(s.handleStatus))
-	http.HandleFunc("/block/latest", s.withLimit(s.handleLatestBlock))
-	http.HandleFunc("/block", s.withLimit(s.handleGetBlockByHeight))
+	mux.HandleFunc("/health", s.handleHealth)
+	mux.HandleFunc("/status", s.handleStatus)
+	mux.HandleFunc("/block/latest", s.handleLatestBlock)
+	mux.HandleFunc("/block", s.handleBlockByHeight)
 
 	log.Printf("🌐 RPC server listening on %s\n", s.addr)
-	log.Fatal(http.ListenAndServe(s.addr, nil))
-}
-
-// --------------------
-// Rate Limiter
-// --------------------
-
-func (s *Server) withLimit(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-
-		s.mu.Lock()
-		s.clients[ip]++
-		count := s.clients[ip]
-		s.mu.Unlock()
-
-		if count > s.limit {
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
-
-		next(w, r)
+	if err := http.ListenAndServe(s.addr, mux); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func (s *Server) resetLimiter() {
-	ticker := time.NewTicker(s.window)
-	for range ticker.C {
-		s.mu.Lock()
-		s.clients = make(map[string]int)
-		s.mu.Unlock()
-	}
+/* ---------------- Handlers ---------------- */
+
+func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, map[string]string{
+		"status": "ok",
+	})
 }
 
-// --------------------
-// Handlers
-// --------------------
-
-func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
-	resp := map[string]interface{}{
+func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, map[string]interface{}{
 		"height": s.chain.Height(),
-	}
-	json.NewEncoder(w).Encode(resp)
+	})
 }
 
-func (s *Server) handleLatestBlock(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleLatestBlock(w http.ResponseWriter, _ *http.Request) {
 	block := s.chain.LastBlock()
-	json.NewEncoder(w).Encode(block)
+	if block == nil {
+		http.Error(w, "no blocks", http.StatusNotFound)
+		return
+	}
+	writeJSON(w, block)
 }
 
-func (s *Server) handleGetBlockByHeight(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleBlockByHeight(w http.ResponseWriter, r *http.Request) {
 	heightStr := r.URL.Query().Get("height")
 	if heightStr == "" {
-		http.Error(w, "missing height parameter", http.StatusBadRequest)
+		http.Error(w, "missing height", http.StatusBadRequest)
 		return
 	}
 
-	// ✅ FIX UTAMA ADA DI SINI
 	height, err := strconv.ParseUint(heightStr, 10, 64)
 	if err != nil {
-		http.Error(w, "invalid height parameter", http.StatusBadRequest)
+		http.Error(w, "invalid height", http.StatusBadRequest)
 		return
 	}
 
-	block, err := s.chain.GetBlockByHeight(height)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	block, ok := s.chain.GetBlockByHeight(height)
+	if !ok {
+		http.Error(w, "block not found", http.StatusNotFound)
 		return
 	}
 
-	json.NewEncoder(w).Encode(block)
+	writeJSON(w, block)
+}
+
+/* ---------------- Helpers ---------------- */
+
+func writeJSON(w http.ResponseWriter, v interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(v)
 }
