@@ -1,21 +1,33 @@
 package blockchain
 
-type ChainView struct {
-	lastHash []byte
-	height   uint64
+import "github.com/irlan/quantumpay-go/internal/core"
+
+// view adalah adapter read-only dari Blockchain
+// untuk memenuhi interface block.ChainView
+type view struct {
+	chain *Blockchain
 }
 
-func NewChainView(chain *Blockchain) *ChainView {
-	return &ChainView{
-		lastHash: chain.LastHash(),
-		height:   chain.Height(),
+// NewView membuat ChainView tanpa import cycle
+func NewView(chain *Blockchain) *view {
+	return &view{chain: chain}
+}
+
+// Height mengembalikan tinggi chain saat ini
+func (v *view) Height() uint64 {
+	return v.chain.Height()
+}
+
+// LastHash mengembalikan hash block terakhir
+func (v *view) LastHash() []byte {
+	return v.chain.LastHash()
+}
+
+// GetBlockByHeight mengembalikan block atau nil jika tidak ada
+func (v *view) GetBlockByHeight(h uint64) *core.Block {
+	blk, err := v.chain.GetBlockByHeight(h)
+	if err != nil {
+		return nil
 	}
-}
-
-func (v *ChainView) LastHash() []byte {
-	return v.lastHash
-}
-
-func (v *ChainView) Height() uint64 {
-	return v.height
+	return blk
 }
