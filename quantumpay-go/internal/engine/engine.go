@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"sync"
+	"log"
 
 	"github.com/irlan/quantumpay-go/internal/block"
 	"github.com/irlan/quantumpay-go/internal/blockchain"
@@ -9,37 +9,76 @@ import (
 	"github.com/irlan/quantumpay-go/internal/mempool"
 )
 
-type Engine struct {
-	mu    sync.Mutex
+/*
+   ===============================
+   ChainView Adapter (ANTI CYCLE)
+   ===============================
+   Mengadaptasi *blockchain.Blockchain
+   -> block.ChainView
+*/
+type chainViewAdapter struct {
 	chain *blockchain.Blockchain
-	mp    *mempool.Mempool
 }
 
-func New(chain *blockchain.Blockchain, mp *mempool.Mempool) *Engine {
+func (v *chainViewAdapter) Height() uint64 {
+	return v.chain.Height()
+}
+
+func (v *chainViewAdapter) LastHash() []byte {
+	return v.chain.LastHash()
+}
+
+func (v *chainViewAdapter) GetBlockByHeight(h uint64) *core.Block {
+	blk, err := v.chain.GetBlockByHeight(h)
+	if err != nil {
+		return nil
+	}
+	return blk
+}
+
+/*
+   ===============================
+   Engine
+   ===============================
+*/
+type Engine struct {
+	chain   *blockchain.Blockchain
+	mempool *mempool.Mempool
+}
+
+func New(
+	chain *blockchain.Blockchain,
+	mempool *mempool.Mempool,
+) *Engine {
 	return &Engine{
-		chain: chain,
-		mp:    mp,
+		chain:   chain,
+		mempool: mempool,
 	}
 }
 
-// ProduceBlock builds a new block from mempool and appends it to chain
+/*
+   ===============================
+   Produce Block
+   ===============================
+*/
 func (e *Engine) ProduceBlock() (*core.Block, error) {
-	e.mu.Lock()
-	defer e.mu.Unlock()
+	view := &chainViewAdapter{chain: e.chain}
 
-	// ✅ Adapter: Blockchain → ChainView
-	view := blockchain.NewView(e.chain)
-
-	// ✅ Builder only sees ChainView + Mempool
-	builder := block.NewBuilder(view, e.mp)
+	builder := block.NewBuilder(
+		view,
+		e.mempool,
+	)
 
 	blk := builder.Build()
+
 	if blk == nil {
 		return nil, nil
 	}
 
-	// Append block (blockchain owns mutation)
+	// Add block ke chain (void function)
 	e.chain.AddBlock(blk)
+
+	log.Printf("[ENGINE] Block produced height=%d", e.chain.Height())
 
 	return blk, nil
 }

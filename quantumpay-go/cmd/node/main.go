@@ -2,45 +2,39 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
+	"time"
 
 	"github.com/irlan/quantumpay-go/internal/blockchain"
 	"github.com/irlan/quantumpay-go/internal/engine"
-	"github.com/irlan/quantumpay-go/internal/grpc/server"
 	"github.com/irlan/quantumpay-go/internal/mempool"
-	"github.com/irlan/quantumpay-go/internal/state"
 )
 
 func main() {
-	log.Println("🚀 QuantumPay Node starting...")
-
-	// --- Core ---
+	// Initialize blockchain
 	chain := blockchain.NewBlockchain()
-	ws := state.NewWorldState()
+
+	// Initialize mempool
 	mp := mempool.New()
 
-	eng := engine.New(chain, ws, mp)
+	// Initialize engine
+	eng := engine.New(chain, mp)
 
-	// --- gRPC ---
-	grpcServer := server.New(":9090")
+	log.Println("QuantumPay node started")
 
-	go func() {
-		if err := grpcServer.Start(); err != nil {
-			log.Fatal(err)
+	// Simple block production loop (temporary, dev-mode)
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		blk, err := eng.ProduceBlock()
+		if err != nil {
+			log.Println("ProduceBlock error:", err)
+			continue
 		}
-	}()
 
-	// --- Block production (sementara 1x) ---
-	eng.ProduceBlock()
-	log.Println("📦 Blockchain height:", chain.Height())
-
-	// --- Graceful shutdown ---
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	<-stop
-
-	grpcServer.Stop()
-	log.Println("🟢 Node shutdown cleanly")
+		log.Printf("New block produced: height=%d hash=%x\n",
+			chain.Height(),
+			blk.Hash,
+		)
+	}
 }
