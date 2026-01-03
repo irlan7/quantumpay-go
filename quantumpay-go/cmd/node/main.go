@@ -14,20 +14,20 @@ import (
 )
 
 func main() {
-	// ---- Flags (future-proof, P2P disabled by default)
-	enableP2P := flag.Bool("p2p", false, "enable p2p networking (disabled by default)")
-	p2pPort := flag.Int("p2p-port", 7001, "p2p listen port (unused for now)")
+	// ===== FLAGS =====
+	enableP2P := flag.Bool("p2p", false, "enable p2p networking (v1 placeholder)")
+	p2pPort := flag.Int("p2p-port", 7001, "p2p listen port (reserved)")
+	p2pPeer := flag.String("p2p-peer", "", "p2p peer address (reserved)")
 	flag.Parse()
 
 	log.Println("[NODE] Starting QuantumPay node")
 
-	// ---- Core components (STABLE)
+	// ===== CORE (STABLE) =====
 	chain := blockchain.NewBlockchain()
 	mp := mempool.New()
-
 	eng := engine.New(chain, mp)
 
-	// ---- Produce blocks in background
+	// ===== ENGINE LOOP (STABLE) =====
 	go func() {
 		for {
 			blk, err := eng.ProduceBlock()
@@ -35,19 +35,28 @@ func main() {
 				log.Println("[ENGINE] block production error:", err)
 				continue
 			}
-			log.Printf("[ENGINE] New block produced height=%d hash=%x\n",
-				blk.Height, blk.Hash)
+			log.Printf(
+				"[ENGINE] New block produced height=%d hash=%x\n",
+				blk.Height,
+				blk.Hash,
+			)
 			time.Sleep(5 * time.Second)
 		}
 	}()
 
-	// ---- P2P placeholder (INTENTIONALLY NO IMPORT)
+	// ===== P2P PLACEHOLDER (NO IMPORT, NO CYCLE) =====
 	if *enableP2P {
-		log.Printf("[P2P] flag enabled but P2P runtime is not wired yet (port=%d)\n", *p2pPort)
-		log.Println("[P2P] This is expected in P2P v1 phase")
+		log.Printf("[P2P] enabled (v1 placeholder)")
+		log.Printf("[P2P] listen port : %d", *p2pPort)
+
+		if *p2pPeer != "" {
+			log.Printf("[P2P] peer target  : %s", *p2pPeer)
+		}
+
+		log.Println("[P2P] runtime NOT wired yet (expected in P2P v1 phase)")
 	}
 
-	// ---- Graceful shutdown
+	// ===== GRACEFUL SHUTDOWN =====
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	<-sig
