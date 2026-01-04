@@ -1,18 +1,13 @@
 package p2pv1
 
-import (
-	"encoding/gob"
-	"net"
-)
+import "encoding/json"
 
-func sendMessage(conn net.Conn, msg *Message) error {
-	enc := gob.NewEncoder(conn)
-	return enc.Encode(msg)
+func EncodeHeader(h HeaderMsg) ([]byte, error) {
+	return json.Marshal(h)
 }
 
-func readMessage(conn net.Conn) (*Message, error) {
-	dec := gob.NewDecoder(conn)
-	var msg Message
-	err := dec.Decode(&msg)
-	return &msg, err
+func DecodeHeader(b []byte) (HeaderMsg, error) {
+	var h HeaderMsg
+	err := json.Unmarshal(b, &h)
+	return h, err
 }

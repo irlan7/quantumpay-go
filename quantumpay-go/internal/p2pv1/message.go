@@ -1,17 +1,17 @@
 package p2pv1
 
-type MessageType uint8
-
 const (
-	MsgHeader MessageType = 1
+	MsgHeader = 1
 )
 
+// Message adalah envelope tunggal
+type Message struct {
+	Type uint8
+	Data []byte
+}
+
+// HeaderMsg adalah payload untuk gossip header
 type HeaderMsg struct {
 	Height uint64
 	Hash   []byte
-}
-
-type Message struct {
-	Type   MessageType
-	Header *HeaderMsg
 }
