@@ -1,12 +1,17 @@
 package p2pv1
 
-type Message struct {
-	Type string
-	Data []byte
-}
+type MessageType uint8
 
 const (
-	MsgHandshake = "handshake"
-	MsgPing      = "ping"
-	MsgPong      = "pong"
+	MsgHeader MessageType = 1
 )
+
+type HeaderMsg struct {
+	Height uint64
+	Hash   []byte
+}
+
+type Message struct {
+	Type   MessageType
+	Header *HeaderMsg
+}
