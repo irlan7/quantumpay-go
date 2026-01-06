@@ -10,11 +10,11 @@ import (
 )
 
 /*
-   ===============================
-   ChainView Adapter (ANTI CYCLE)
-   ===============================
-   Mengadaptasi *blockchain.Blockchain
-   -> block.ChainView
+===============================
+ChainView Adapter (ANTI CYCLE)
+===============================
+Mengadaptasi *blockchain.Blockchain
+-> block.ChainView
 */
 type chainViewAdapter struct {
 	chain *blockchain.Blockchain
@@ -37,9 +37,9 @@ func (v *chainViewAdapter) GetBlockByHeight(h uint64) *core.Block {
 }
 
 /*
-   ===============================
-   Engine
-   ===============================
+===============================
+Engine
+===============================
 */
 type Engine struct {
 	chain   *blockchain.Blockchain
@@ -57,9 +57,9 @@ func New(
 }
 
 /*
-   ===============================
-   Produce Block
-   ===============================
+===============================
+Produce Block
+===============================
 */
 func (e *Engine) ProduceBlock() (*core.Block, error) {
 	view := &chainViewAdapter{chain: e.chain}

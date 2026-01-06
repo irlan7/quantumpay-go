@@ -4,78 +4,261 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
+/*
+Node = orchestrator utama blockchain node
+
+Tanggung jawab:
+- wire P2P
+- wire tx gossip
+- wire state execution
+- wire finality v1 & v2
+- TIDAK mengandung logic finality / crypto langsung (ANTI-CYCLE)
+*/
+
+// ===============================
+// Node structure
+// ===============================
+
 type Node struct {
-	cfg     Config
-	headers map[uint64]BlockHeader
-	mu      sync.Mutex
+	cfg Config
+
+	listener net.Listener
+
+	peers   map[*Peer]struct{}
+	peersMu sync.Mutex
+
+	headerPool *HeaderPool
+	blockStore *BlockStore
+	state      *State
+
+	txPool   *TxPool
+	txGossip *TxGossip
+
+	finality   *FinalityGadget // v1 (checkpoint lokal)
+	finalityV2 *FinalityV2     // v2 (validator vote)
+
+	handler *Handler
 }
+
+// ===============================
+// Constructor
+// ===============================
 
 func NewNode(cfg Config) *Node {
-	return &Node{
-		cfg:     cfg,
-		headers: make(map[uint64]BlockHeader),
+	n := &Node{
+		cfg:        cfg,
+		peers:      make(map[*Peer]struct{}),
+		headerPool: NewHeaderPool(),
+		blockStore: NewBlockStore(),
+		state:      NewState(),
+		txPool:     NewTxPool(10_000),
+		txGossip:   NewTxGossip(30 * time.Second),
+		finality:   NewFinalityGadget(),
+		finalityV2: NewFinalityV2(cfg.Validators),
 	}
+
+	// one-way dependency: Node → Handler
+	n.handler = NewHandler(n)
+	return n
 }
 
-func (n *Node) Start() error {
-	addr := ":" + n.cfg.ListenPort
+// ===============================
+// Start / Stop
+// ===============================
+
+func (n *Node) Start(addr string) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
+	n.listener = ln
 
-	log.Println("[P2P] listening on", addr)
+	log.Printf("[NODE] listening on %s", addr)
+	go n.acceptLoop()
+	return nil
+}
 
-	if n.cfg.PeerAddr != "" {
-		go n.dialPeer(n.cfg.PeerAddr)
+func (n *Node) Stop() {
+	if n.listener != nil {
+		_ = n.listener.Close()
 	}
 
+	n.peersMu.Lock()
+	defer n.peersMu.Unlock()
+
+	for p := range n.peers {
+		p.Close()
+	}
+	log.Printf("[NODE] stopped")
+}
+
+// ===============================
+// Peer handling
+// ===============================
+
+func (n *Node) acceptLoop() {
 	for {
-		c, err := ln.Accept()
+		conn, err := n.listener.Accept()
 		if err != nil {
+			log.Printf("[NODE] accept error: %v", err)
+			return
+		}
+
+		p := NewPeer(conn)
+		n.addPeer(p)
+
+		log.Printf("[NODE] inbound peer connected")
+		go p.ReceiveLoop(n.handler)
+	}
+}
+
+func (n *Node) Dial(addr string) error {
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	p := NewPeer(conn)
+	n.addPeer(p)
+
+	log.Printf("[NODE] outbound peer connected: %s", addr)
+	go p.ReceiveLoop(n.handler)
+	return nil
+}
+
+func (n *Node) addPeer(p *Peer) {
+	n.peersMu.Lock()
+	defer n.peersMu.Unlock()
+	n.peers[p] = struct{}{}
+}
+
+// ===============================
+// TX GOSSIP
+// ===============================
+
+func (n *Node) BroadcastTxExcept(tx Transaction, except *Peer) {
+	n.peersMu.Lock()
+	defer n.peersMu.Unlock()
+
+	for p := range n.peers {
+		if p == except {
 			continue
 		}
-		go n.handleConn(c)
+		_ = p.SendTx(tx)
 	}
 }
 
-func (n *Node) dialPeer(addr string) {
-	c, err := net.Dial("tcp", addr)
-	if err != nil {
-		log.Println("[P2P] dial failed:", err)
-		return
+func (n *Node) InjectTx(tx Transaction) error {
+	if !n.txGossip.Allow(tx.Hash) {
+		return nil
 	}
-	n.handleConn(c)
+	if err := n.txPool.Add(tx, n.state); err != nil {
+		return err
+	}
+	n.BroadcastTxExcept(tx, nil)
+	return nil
 }
 
-func (n *Node) handleConn(c net.Conn) {
-	p := NewPeer(c)
+// ===============================
+// Block / Header helpers
+// ===============================
 
-	buf := make([]byte, 4096)
+func (n *Node) HasBlock(hash string) bool {
+	return n.blockStore.Has(hash)
+}
+
+func (n *Node) GetBlock(hash string) (BlockMsg, bool) {
+	return n.blockStore.Get(hash)
+}
+
+func (n *Node) StoreBlock(b BlockMsg) error {
+	return n.blockStore.Add(b)
+}
+
+// ===============================
+// Header + Finality wiring
+// ===============================
+
+func (n *Node) AddHeader(h HeaderMsg) {
+	// fork-choice
+	n.headerPool.Add(h)
+
+	// finality v1 (checkpoint lokal)
+	n.finality.OnHeader(h)
+	n.finality.TryFinalize()
+
+	// finality v2 TIDAK auto vote (anti-cycle)
+}
+
+// ===============================
+// STATE EXECUTION + STATE ROOT
+// ===============================
+
+func (n *Node) TryExecuteBlocks() {
 	for {
-		nr, err := c.Read(buf)
+		tip, err := n.headerPool.Tip()
 		if err != nil {
 			return
 		}
 
-		msg := Message{
-			Type: buf[0],
-			Data: buf[1:nr],
+		if n.state.Height() >= tip.Height {
+			return
 		}
-		n.handleMessage(p, msg)
+
+		b, ok := n.blockStore.NextUnexecuted("")
+		if !ok {
+			return
+		}
+
+		snap := n.state.Snapshot()
+		if err := n.state.ApplyBlock(b); err != nil {
+			n.state = snap
+			return
+		}
+
+		// compute deterministic state root
+		root := n.state.RootHash()
+
+		// mark executed
+		n.blockStore.MarkExecuted(b.Hash)
+
+		// bind header with state root
+		h := HeaderMsg{
+			Hash:       b.Hash,
+			ParentHash: b.ParentHash,
+			Height:     b.Height,
+			Timestamp:  b.Timestamp,
+			StateRoot:  root,
+		}
+		n.headerPool.Add(h)
+
+		// cleanup mempool
+		for _, tx := range b.Txs {
+			n.txPool.Remove(tx.Hash)
+		}
+
+		log.Printf(
+			"[EXEC] block height=%d hash=%s stateRoot=%x",
+			b.Height,
+			b.Hash,
+			root,
+		)
 	}
 }
 
-// === HEADER STORAGE (MEMORY ONLY) ===
+// ===============================
+// FINALITY V2 HELPERS
+// ===============================
 
-func (n *Node) storeHeader(h HeaderMsg) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
+// SubmitVote dipakai validator lokal / RPC
+func (n *Node) SubmitVote(v Vote) error {
+	return n.finalityV2.OnVote(v)
+}
 
-	n.headers[h.Height] = BlockHeader{
-		Height: h.Height,
-		Hash:   h.Hash,
-	}
+// LastFinalizedCheckpoint (v2)
+func (n *Node) LastFinalizedCheckpoint() uint64 {
+	return n.finalityV2.LastFinalized()
 }

@@ -8,10 +8,10 @@ import (
 )
 
 type rateLimiter struct {
-	mu       sync.Mutex
-	clients  map[string]*clientState
-	limit    int
-	window   time.Duration
+	mu      sync.Mutex
+	clients map[string]*clientState
+	limit   int
+	window  time.Duration
 }
 
 type clientState struct {

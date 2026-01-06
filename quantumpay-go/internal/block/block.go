@@ -9,11 +9,11 @@ import (
 )
 
 type BlockHeader struct {
-	Height     uint64
-	PrevHash   string
-	StateRoot  string // placeholder (akan diisi nanti)
-	TxRoot     string // placeholder
-	Proposer   string
+	Height    uint64
+	PrevHash  string
+	StateRoot string // placeholder (akan diisi nanti)
+	TxRoot    string // placeholder
+	Proposer  string
 }
 
 type Block struct {
