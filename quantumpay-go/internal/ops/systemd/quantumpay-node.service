@@ -1,0 +1,40 @@
+[Unit]
+Description=Quantumpay Blockchain Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# === SECURITY CONTEXT ===
+User=quantumpay
+Group=quantumpay
+NoNewPrivileges=true
+PrivateTmp=true
+
+# === PATH ===
+WorkingDirectory=/opt/quantumpay/quantumpay-go
+ExecStart=/opt/quantumpay/quantumpay-go/quantumpay-node
+
+# === ENVIRONMENT ===
+Environment=QP_ENV=testnet
+Environment=QP_LOG_LEVEL=info
+
+# === RESTART POLICY ===
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+
+# === RESOURCE LIMIT ===
+LimitNOFILE=65535
+
+# === LOGGING ===
+StandardOutput=journal
+StandardError=journal
+
+# === SHUTDOWN ===
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
