@@ -1,164 +1,308 @@
-# Governance
+GOVERNANCE.md
 
-This document defines the governance model of the Quantumpay protocol.
+Quantumpay Protocol Governance
 
-Quantumpay is an infrastructure-grade blockchain network designed for long-term
-stability, determinism, and regulatory-aware operation. Governance exists to
-protect the protocol, not to optimize for speed or popularity.
+1. Purpose
 
-## Governance Model
+This document defines the governance model of the Quantumpay Protocol.
 
-Quantumpay follows a **maintainer-driven governance model**.
+Governance exists to:
 
-- The protocol is open source and publicly auditable
-- Anyone may review, discuss, or propose changes
-- Final decision-making authority rests with the maintainers
+Preserve protocol integrity
 
-This model is intentional and appropriate for an early-stage mainnet protocol.
+Protect long-term network stability
 
-## Scope of Governance
+Prevent unilateral control
 
-Governance applies to protocol-level behavior, including:
-
-- Consensus rules
-- State transition logic
-- Transaction formats and validation
-- Network protocol behavior
-- Security-critical parameters
-
-Governance does **not** apply to:
-- Off-chain services
-- Commercial offerings
-- Managed infrastructure
-- User interfaces, dashboards, or tooling
-
-## Decision Principles
-
-All governance decisions are guided by the following principles:
-
-1. **Stability over velocity**
-2. **Determinism over flexibility**
-3. **Safety over features**
-4. **Explicit changes over implicit behavior**
-5. **Backward compatibility where possible**
-
-Changes that increase ambiguity, complexity, or attack surface are rejected by default.
-
-## Change Classification
-
-### Non-Breaking Changes
-Examples:
-- Internal refactoring with no behavior change
-- Logging or observability improvements
-- Documentation updates
-
-Approval: Maintainer  
-Network notice: Optional
-
-### Soft Changes (Backward Compatible)
-Examples:
-- Parameter tuning
-- Performance improvements
-- Optional features
-
-Approval:
-- Lead Maintainer
-- Governance reviewer
-
-Process:
-- Proposal
-- Review
-- Scheduled release
-
----
-
-### Hard Changes (Consensus / State Affecting)
-Examples:
-- Consensus logic changes
-- State transition rule changes
-- Fee model changes
-- Fork-related changes
-
-Approval:
-- Governance Committee (quorum ≥ ⅔)
-
-Process:
-1. Formal proposal (QCP)
-2. Public review window (minimum 14 days)
-3. Final approval
-4. Scheduled activation (block height or timestamp)
-
-Emergency bypass for hard changes is **not permitted**.
-
-## Chain ID Immutability
-
-The Quantumpay Mainnet Chain ID is permanently fixed.
-
-Once the Quantumpay Mainnet is live, the Chain ID **MUST NOT** be changed, reused,
-overridden, or reassigned under any circumstances.
-
-Any future protocol evolution, upgrade, or network change must occur through
-explicit versioning and governance processes, not by modifying the Chain ID.
-
-Changing the Chain ID after mainnet launch is considered a protocol violation.
-
----
-
-## Authority and Control
-
-- There are no hidden administrator keys
-- There is no emergency kill switch
-- Maintainers cannot arbitrarily modify ledger state
-
-Protocol rules are enforced by node software and consensus, not by individuals.
-
-## Change Freeze Policy
-
-### Architecture Freeze
-- Core architecture is considered **frozen** after mainnet launch
-- Changes require formal governance approval
-
-### Emergency Freeze
-Activated if:
-- Network instability
-- Security incidents
-- Chain divergence
-
-During emergency freeze:
-- All changes are suspended except security mitigation
-
-## Transparency and Auditability
-
-- All approved changes are documented
-- Decisions are recorded with timestamps and approvers
-- Releases reference corresponding governance decisions
-- No undocumented or silent changes are allowed
+Ensure transparent, predictable decision-making
 
 
-## Evolution of Governance
+Quantumpay governance is intentionally conservative, minimal, and slow-moving.
 
-Governance may evolve as the network matures.
 
-Any evolution will be:
-- Publicly documented
-- Gradual
-- Backward-compatible
-- Focused on preserving protocol neutrality
+2. Governance Philosophy
 
-Governance evolution will not compromise protocol safety.
+Quantumpay follows these core principles:
 
-## Non-Goals
+1. Protocol > Organization
+The protocol exists independently of any company, foundation, or individual.
 
-Quantumpay governance explicitly avoids:
 
-- Token-weighted voting
-- Popularity-based governance
-- Rapid or speculative protocol changes
-- Governance mechanisms that increase risk
+2. Stability Over Velocity
+Protocol changes are rare and carefully controlled.
 
-## Summary
 
-Quantumpay governance is intentionally conservative.
+3. Transparency by Default
+All governance decisions, wallets, and changes are publicly observable.
 
-The objective is to maintain a stable, neutral, and predictable protocol suitable
-for long-term public and institutional use, rather than a rapidly changing platform.
+
+4. No Founder Privilege
+Founders have no special protocol authority beyond standard network participation.
+
+
+5. Determinism First
+Governance must never compromise deterministic execution or chain safety.
+
+
+3. Governance Scope
+
+Governance applies to:
+
+Protocol rules
+
+Consensus parameters
+
+Genesis state and chain identity
+
+Upgrade procedures
+
+Emergency response policies
+
+
+Governance does NOT apply to:
+
+Application-layer services
+
+Off-chain businesses
+
+Private infrastructure
+
+Third-party integrations
+
+4. Governance Structure
+
+Quantumpay governance consists of three layers:
+
+4.1 Protocol Layer (Immutable Core)
+
+Deterministic blockchain engine
+
+State machine logic
+
+Block structure and validation rules
+
+
+Status:
+🔒 Architecture Frozen
+
+Changes to this layer require:
+
+Formal governance proposal
+
+Multi-phase review
+
+Explicit community signaling
+
+Long activation delays
+
+4.2 Governance Process Layer
+
+Defines how changes can occur.
+
+Key characteristics:
+
+Proposal-based
+
+Documented in-repo
+
+Public review period
+
+Explicit activation conditions
+
+
+No hidden or emergency backdoors exist.
+
+4.3 Execution Layer (Nodes)
+
+Nodes execute governance-approved changes
+
+Nodes may choose whether to upgrade
+
+No forced upgrades
+
+
+5. Founder Role & Limitations
+
+Founders:
+
+Are regular network participants
+
+May run nodes
+
+May hold tokens
+
+
+Founders cannot:
+
+Modify protocol rules unilaterally
+
+Change consensus parameters
+
+Override governance decisions
+
+Introduce hidden control mechanisms
+
+
+Founder wallets are governed by the Founder Allocation Policy and Founder Wallet Disclosure.
+
+6. Founder Wallet Transparency
+
+All founder wallets:
+
+Are publicly disclosed
+
+Are traceable on-chain
+
+Follow standard transaction rules
+
+Have no special privileges
+
+
+Any movement of founder funds:
+
+Appears as standard on-chain transactions
+
+Is visible via transaction hash (TXID)
+
+Is observable by all network participants
+
+
+There are no private, shielded, or obfuscated founder transactions.
+
+See:
+FOUNDER_WALLET_DISCLOSURE.md
+
+
+7. Governance Change Control
+
+7.1 Proposal Requirements
+
+All governance changes require:
+
+Written proposal (in-repo)
+
+Clear scope and rationale
+
+Risk analysis
+
+Backward compatibility assessment
+
+Activation conditions
+
+
+7.2 Review Period
+
+Mandatory public review window
+
+No fast-track governance
+
+No silent changes
+
+
+7.3 Activation Rules
+
+Governance approval ≠ forced activation
+
+Nodes decide independently to upgrade
+
+Chain splits are avoided by design, not coercion
+
+
+8. Emergency Governance
+
+Quantumpay does not support discretionary emergency powers.
+
+In extreme cases:
+
+Emergency procedures must be pre-defined
+
+No single party may act alone
+
+Transparency remains mandatory
+
+
+If no safe resolution exists, network safety takes precedence over continuity.
+
+9. Chain Identity & Genesis Freeze
+
+Chain ID is permanently fixed at mainnet launch
+
+Genesis parameters are immutable after declaration
+
+Any incompatible change requires a new network
+
+
+See:
+
+GENESIS_FREEZE.md
+
+MAINNET_DECLARATION.md
+
+
+10. Relationship with Legal Entities
+
+Legal entities (e.g. Foundation or PT):
+
+Cannot control the protocol
+
+Cannot modify consensus
+
+Cannot override governance
+
+
+They may:
+
+Provide services
+
+Fund development
+
+Support ecosystem growth
+
+
+Protocol governance remains independent and neutral.
+
+
+11. Transparency Commitments
+
+Quantumpay commits to:
+
+Public governance documents
+
+Public decision records
+
+Open protocol discussions
+
+Clear historical archives
+
+
+See:
+
+HISTORY.md
+
+ARCHIVE.md
+
+
+12. Governance Immutability Clause
+
+Once mainnet is declared:
+
+Governance rules become binding
+
+Retroactive changes are prohibited
+
+Trust is preserved through consistency, not authority
+
+
+13. Final Statement
+
+Quantumpay governance is designed to ensure that:
+
+> No one can silently change the rules.
+No one is above the protocol.
+Trust emerges from structure, not personalities.
+
+End of Document
+
+
+
+Kamu sudah melakukan ini dengan sangat benar dan dewasa.
