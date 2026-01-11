@@ -1,0 +1,103 @@
+# Quantumpay Mainnet Declaration
+
+This document formally declares the launch and operational principles of the Quantumpay Mainnet.
+
+Quantumpay Mainnet is intended to operate as a long-lived, infrastructure-grade blockchain network,
+prioritizing correctness, determinism, and trust over rapid change or experimentation.
+
+## Mainnet Status
+
+Quantumpay Mainnet is declared **live** once the following conditions are met:
+
+- Genesis block is finalized and published
+- Chain ID is fixed and immutable
+- At least two independent nodes are running
+- Core protocol behavior is frozen
+- Governance and operational documents are published
+
+Once declared live, the network is considered production infrastructure.
+
+## Chain Identity
+
+- **Network Name:** Quantumpay Mainnet  
+- **Chain ID:** 77001  
+
+### Chain ID Immutability
+
+The Quantumpay Mainnet Chain ID is permanent.
+
+Once mainnet is live, the Chain ID **MUST NOT** be changed, reused, overridden, or reassigned under any circumstances.
+
+Any future protocol evolution must occur through explicit versioning and governance processes, not by modifying the Chain ID.
+
+Changing the Chain ID after mainnet launch is considered a protocol violation.
+
+---
+
+## Genesis and Ledger Integrity
+
+- The genesis block defines the initial state of the Quantumpay Mainnet
+- Genesis parameters are final once published
+- Ledger history is append-only
+- There is no mechanism for retroactive state modification
+
+Ledger integrity is enforced by protocol rules and consensus, not by any individual or organization.
+
+## Upgrade and Change Policy
+
+- There are no automatic upgrades
+- Node operators decide when to upgrade
+- Protocol-breaking changes require formal governance approval
+- Backward compatibility is preserved whenever possible
+
+Emergency changes are limited to security mitigation and follow documented governance procedures.
+
+## Governance Authority
+
+Quantumpay Mainnet governance follows a maintainer-driven model as described in `GOVERNANCE.md`.
+
+- There are no administrator backdoors
+- There is no emergency kill switch
+- No entity has unilateral control over the ledger
+
+All authority is constrained by protocol rules and public governance processes.
+
+## Operator Responsibility
+
+Node operators are responsible for:
+
+- Running supported node versions
+- Monitoring node health
+- Applying upgrades intentionally
+- Maintaining their own infrastructure security
+
+Quantumpay does not provide custodial services or operational guarantees.
+
+## Network Philosophy
+
+Quantumpay Mainnet is designed to be:
+
+- Boring rather than flashy
+- Predictable rather than experimental
+- Conservative rather than aggressive
+- Infrastructure-first rather than speculative
+
+The network favors long-term reliability over short-term growth.
+
+## Legal and Regulatory Posture
+
+Quantumpay Mainnet is an open, neutral protocol.
+
+- It does not represent an investment product
+- It does not promise financial returns
+- It does not provide custodial or intermediary services
+
+Any services built on top of the protocol are separate from the protocol itself and subject to their own legal frameworks.
+
+## Final Statement
+
+With this declaration, Quantumpay Mainnet commits to operating as stable public infrastructure.
+
+All future changes will respect the immutability of the ledger, the fixed Chain ID, and the trust of node operators and users.
+
+This declaration is intended to remain valid for the lifetime of the Quantumpay Mainnet.
