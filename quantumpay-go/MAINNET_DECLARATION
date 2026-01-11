@@ -32,8 +32,6 @@ Any future protocol evolution must occur through explicit versioning and governa
 
 Changing the Chain ID after mainnet launch is considered a protocol violation.
 
----
-
 ## Genesis and Ledger Integrity
 
 - The genesis block defines the initial state of the Quantumpay Mainnet
