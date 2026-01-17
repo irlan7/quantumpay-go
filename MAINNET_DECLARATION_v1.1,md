@@ -1,0 +1,102 @@
+QuantumPay Mainnet Declaration v1.1
+
+(Signed & Checksummed Release)
+
+Document Version: v1.1
+Network: QuantumPay Mainnet
+Chain ID: 77001
+Status: ✅ FINAL & FROZEN
+Declaration Date: 16 January 2026
+
+
+1. Declaration
+
+This document formally declares the readiness and activation status of the QuantumPay Mainnet.
+
+QuantumPay is a resilient digital payment and settlement network designed to operate reliably under normal conditions and predefined crisis scenarios, including infrastructure disruptions.
+
+As of the declaration date above:
+
+The QuantumPay Mainnet is operational
+
+The Chain ID 77001 is permanently frozen
+
+Core consensus, block production, and network stability have passed extended soak testing
+
+No further breaking protocol changes are planned prior to public mainnet usage
+
+
+2. Chain ID Finalization
+
+Chain Name: QuantumPay Mainnet
+
+Chain ID: 77001
+
+Policy:
+
+> The Chain ID 77001 is permanently frozen and MUST NOT be changed under any circumstances.
+
+
+Changing the Chain ID after this declaration would:
+
+Break wallet compatibility
+
+Invalidate signatures and historical transactions
+
+Fragment the network and tooling ecosystem
+
+
+3. Network State Summary
+
+Continuous block production: ✅
+
+Multi-node deployment: ✅
+
+Snapshot & recovery procedures: ✅
+
+Crisis Mode operational doctrine: ✅
+
+Mainnet documentation published: ✅
+
+
+The network is considered stable for ecosystem integration, including wallets, explorers, and external services.
+
+
+4. Cryptographic Attestation
+
+This declaration is cryptographically bound to its content via checksum.
+
+SHA-256 Checksum (Document v1.1):
+
+<TO_BE_FILLED_AFTER_FINAL_SAVE>
+
+> The checksum must be generated from the final committed file content
+Example command:
+
+
+
+sha256sum MAINNET_DECLARATION_v1.1.md
+
+Any modification to this document after publication invalidates this checksum.
+
+
+5. Governance & Finality
+
+This declaration represents a final governance statement for the QuantumPay Mainnet launch phase.
+
+Subsequent changes, if any, must be issued as:
+
+New declaration versions, or
+
+Addendum documents explicitly referencing this declaration
+
+
+6. Closing Statement
+
+QuantumPay Mainnet is declared LIVE, FINAL, and GOVERNANCE-FROZEN with respect to its Chain ID and core protocol identity.
+
+This declaration serves as a public, auditable, and verifiable reference for the global community.
+
+
+QuantumPay Core Team
+Resilient Digital Payment Infrastructure
