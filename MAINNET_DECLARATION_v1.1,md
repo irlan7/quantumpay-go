@@ -1,3 +1,4 @@
+
 QuantumPay Mainnet Declaration v1.1
 
 (Signed & Checksummed Release)
@@ -35,7 +36,6 @@ Chain ID: 77001
 Policy:
 
 > The Chain ID 77001 is permanently frozen and MUST NOT be changed under any circumstances.
-
 
 Changing the Chain ID after this declaration would:
 
@@ -100,3 +100,7 @@ This declaration serves as a public, auditable, and verifiable reference for the
 
 QuantumPay Core Team
 Resilient Digital Payment Infrastructure
+
+
+
+
