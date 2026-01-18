@@ -75,18 +75,26 @@ Mainnet documentation published: ✅
 The network is considered stable for ecosystem integration, including wallets, explorers, and external services.
 
 
-4. Cryptographic Attestation
+4. Cryptographic Attestation (Genesis Binding)
 
-This declaration is cryptographically bound to its content via checksum.
+This declaration is cryptographically bound to the QuantumPay Mainnet
+via the immutable Genesis configuration.
 
-SHA-256 Checksum (Document v1.1):
+Genesis File:
+- Path: config/genesis.json
 
-<TO_BE_FILLED_AFTER_FINAL_SAVE>
+Genesis SHA-256:
+acc395137e5d0c28c609d011ea99d89405f07009c0bbf8933711e1a7f184edc6
 
-> The checksum must be generated from the final committed file content
-Example command:
+Genesis Timestamp (UTC):
+2026-01-16 00:00:00
 
+Any modification to the Genesis file or its contents
+will result in a different genesis hash and therefore
+constitutes a new blockchain network.
 
+This declaration is valid exclusively for the
+QuantumPay Mainnet identified by the above Genesis hash
 
 sha256sum MAINNET_DECLARATION_v1.1.md
 
@@ -113,7 +121,3 @@ This declaration serves as a public, auditable, and verifiable reference for the
 
 QuantumPay Core Team
 Resilient Digital Payment Infrastructure
-
-
-
-
