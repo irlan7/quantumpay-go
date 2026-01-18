@@ -9,6 +9,19 @@ Chain ID: 77001
 Status: ✅ FINAL & FROZEN
 Declaration Date: 16 January 2026
 
+Genesis Information
+
+- Genesis File: config/genesis.json
+- Genesis SHA256:
+  acc395137e5d0c28c609d011ea99d89405f07009c0bbf8933711e1a7f184edc6
+- Genesis Timestamp (UTC): 2026-01-16 00:00:00
+- Initial Supply (QP): 210,000,000
+- Initial Distribution:
+  - Foundation: 30%
+  - Validators (incl. founder stake): 20%
+  - Ecosystem Reserve: 50%
+- Genesis Validators: 3 nodes
+
 
 1. Declaration
 
