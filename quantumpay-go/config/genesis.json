@@ -1,0 +1,59 @@
+{
+  "chain_id": 77001,
+  "network": "quantumpay-mainnet",
+  "genesis_time_utc": "2026-01-16T00:00:00Z",
+
+  "currency": {
+    "symbol": "QP",
+    "decimals": 18,
+    "initial_supply": 210000000
+  },
+
+  "allocations": [
+    {
+      "address": "qp1founderxxxxxxxxxxxxxxxxxxxx",
+      "amount": 21000000,
+      "type": "founder",
+      "lock": {
+        "type": "vesting",
+        "until": "2028-01-16T00:00:00Z"
+      }
+    },
+    {
+      "address": "qp1foundationxxxxxxxxxxxxxxxx",
+      "amount": 42000000,
+      "type": "foundation"
+    },
+    {
+      "address": "qp1ecosystemxxxxxxxxxxxxxxxxx",
+      "amount": 105000000,
+      "type": "ecosystem"
+    },
+    {
+      "address": "qp1validatorreservexxxxxxxxxx",
+      "amount": 42000000,
+      "type": "validator_reserve"
+    }
+  ],
+
+  "validators": [
+    {
+      "address": "qpval1xxxxxxxxxxxxxxxxxxxx",
+      "power": 100
+    },
+    {
+      "address": "qpval2xxxxxxxxxxxxxxxxxxxx",
+      "power": 100
+    },
+    {
+      "address": "qpval3xxxxxxxxxxxxxxxxxxxx",
+      "power": 100
+    }
+  ],
+
+  "consensus": {
+    "type": "pos-bft",
+    "block_time_seconds": 5,
+    "max_validators": 21
+  }
+}
