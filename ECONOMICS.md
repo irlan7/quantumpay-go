@@ -13,6 +13,10 @@ QuantumPay (QP) is the **native coin** of the QuantumPay blockchain, designed as
 - **Staking asset** for Proof-of-Stake security
 - **Economic incentive** for validators and ecosystem participants
 
+  ## Economic Model Diagram
+
+![QuantumPay Tokenomics](./assets/economics-diagram.jpeg)
+
 The QP economic model is designed with:
 - Predictable supply
 - No token sale
