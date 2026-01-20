@@ -15,7 +15,7 @@ QuantumPay (QP) is the **native coin** of the QuantumPay blockchain, designed as
 
   ## Economic Model Diagram
 
-![QuantumPay Tokenomics]( https://github.com/irlan7/quantumpay-go/blob/master/docs/assets/economics-diagram.jpeg)
+https://github.com/irlan7/quantumpay-go/blob/master/docs/assets/economics-diagram.jpeg
 
 The QP economic model is designed with:
 - Predictable supply
