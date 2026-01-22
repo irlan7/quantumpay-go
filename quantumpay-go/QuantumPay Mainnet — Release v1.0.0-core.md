@@ -7,7 +7,7 @@ v1.0.0-core
 
 📅 Release Date
 
-2026-01-23 (UTC)
+2026-01-22 (UTC)
 
 🧩 Overview
 
