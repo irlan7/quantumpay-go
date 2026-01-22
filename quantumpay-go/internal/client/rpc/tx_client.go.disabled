@@ -1,0 +1,15 @@
+package rpc
+
+import (
+	"context"
+
+	pb "quantumpay-go/internal/grpc/proto"
+)
+
+type TxClient struct {
+	client pb.TxServiceClient
+}
+
+func (c *TxClient) GetStatus(ctx context.Context, hash string) (*pb.TxStatusResponse, error) {
+	return c.client.GetTxStatus(ctx, &pb.TxStatusRequest{Hash: hash})
+}

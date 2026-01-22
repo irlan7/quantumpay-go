@@ -1,0 +1,42 @@
+############################
+# Runtime & Blockchain Data
+############################
+data/
+state_*.json
+validators_*.json
+testnet-*/
+genesis-freeze-*
+
+############################
+# Build Artifacts / Binaries
+############################
+quantumpay
+quantumpay*
+*.exe
+
+############################
+# Backups & Archives
+############################
+*.tar.gz
+*.sha256
+*_backup*
+_archive/
+
+############################
+# Node / Frontend
+############################
+node_modules/
+
+############################
+# Editor & OS
+############################
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+############################
+# Logs & Temp
+############################
+*.log
+tmp/
