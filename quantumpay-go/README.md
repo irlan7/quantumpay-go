@@ -1,130 +1,152 @@
-# QuantumPay Go Core
 
-**Status:** Architecture Frozen  
-**Role:** Core Blockchain Engine (Layer-1, Deterministic)
+QuantumPay Blockchain — Mainnet
 
-This repository contains the Go-based core blockchain engine for **QuantumPay**.  
-It implements a minimal, deterministic, and auditable Layer-1 blockchain foundation designed for long-term stability, transparency, and extensibility.
+QuantumPay is a modular, lightweight blockchain core designed for secure value transfer, predictable gas economics, and validator-based staking incentives.
+This repository contains the Mainnet Core implementation written in Go.
 
-At present, Quantumpay is one of — and very likely the first — Layer-1 blockchain protocols built from the ground up in Indonesia with a global orientation and long-term readiness.
+> Status: ✅ Mainnet Core Stable
+Tag: v1.0.0-core
+Language: Go
+License: MIT
 
-## Scope
+✨ Features
 
-This repository intentionally focuses on the **core blockchain engine only**.
+Deterministic Coin & Gas Model
 
-Included:
-- Pure blockchain engine
-- Deterministic state machine
-- Block production & hashing
-- Chain storage & state transitions
+Amount based on math/big.Int
 
-Explicitly excluded:
-- Application layer
-- Smart contracts
-- Token economics logic
-- Governance execution layer
-- Networking consensus complexity beyond minimal P2P
+Safe mint / burn / transfer invariants
 
-This separation is intentional to ensure **auditability, stability, and regulatory clarity**.
+Predictable gas accounting
 
-## Architecture Overview
 
-The architecture is designed around clear, immutable responsibilities:
+Staking & Rewards
 
-- **Core**
-  - Immutable data structures
-  - Cryptographic hashing
-- **State**
-  - World state representation
-  - Deterministic state transitions
-- **Block**
-  - Block construction
-  - Block validation
-- **Blockchain**
-  - Chain storage
-  - Historical views
-- **Engine**
-  - Orchestration of block production
-  - State advancement
+Validator staking
 
-The system is designed to behave predictably under all conditions.
+Reward distribution
 
-## Design Principles
+Slashing-ready architecture
 
-- Determinism over complexity
-- Transparency over opacity
-- Stability over rapid iteration
-- Clear separation of concerns
-- Long-term operability without privileged actors
 
-No hidden logic.  
-No special node authority.  
-No undisclosed backdoors.
+Modular Architecture
 
-## Freeze Policy
+Clean separation: coin, staking, state, consensus
 
-**Freeze Tag:** `v0.1.1-architecture-stable`
+Disabled experimental modules safely archived
 
-From this tag forward:
-- Core architecture is frozen
-- Changes require formal governance review
-- Backward compatibility is prioritized
-- Stability takes precedence over new features
+No import cycles
 
-This layer **MUST NOT** depend on:
-- External services
-- Centralized authorities
-- Mutable runtime assumptions
 
-## Network Status
+Production-Ready Core
 
-- Nodes operate as system services (systemd)
-- Block production verified on-chain
-- Multi-node operation validated
-- Long-running soak tests in progress (7–14 days, no changes)
+All core packages build successfully
 
-The network is currently in a **stability observation phase**.
+Unit-tested economic invariants
 
-## Governance & Transparency
+CLI binary ready
 
-- Governance principles are documented separately
-- Founder allocation disclosure is public
-- Change control is logged and auditable
-- Incident response procedures are defined
 
-Quantumpay is developed with a **compliance-first and public-interest mindset**.
+📦 Repository Structure
 
-## Regulatory Posture
+quantumpay-go/
+├── cmd/
+│   └── quantumpay/          # CLI entrypoint
+│
+├── internal/
+│   ├── coin/                # Coin, gas, supply, balance logic
+│   ├── staking/             # Staking, rewards, slashing
+│   ├── blockchain/          # Block & chain logic
+│   ├── consensus/           # Consensus abstraction
+│   ├── state/               # State management
+│   ├── crypto/              # Cryptography primitives
+│   ├── grpc_disabled/       # Archived (non-mainnet)
+│   └── p2pv1_disabled/      # Archived experimental P2P
+│
+├── .gitignore
+├── go.mod
+├── go.sum
+└── README.md
 
-Quantumpay does not claim:
-- Legal tender status
-- Monetary authority
-- Regulatory approval
 
-All future financial, token, or commercial activities will follow:
-- Applicable laws and regulations
-- Guidance from relevant authorities
-- Jurisdiction-specific compliance requirements
+🚀 Build & Test
 
-This repository represents **infrastructure**, not financial products.
+Build CLI
 
-## Disclaimer
+go build ./cmd/quantumpay
 
-This software is provided **as-is**, for research, infrastructure development, and public review.
+Run Tests
 
-Nothing in this repository constitutes:
-- Investment advice
-- Financial products
-- Solicitation or offering of securities
+go test ./internal/coin
+go test ./internal/staking
 
-## Contribution
+All mainnet-critical modules pass build.
 
-See `CONTRIBUTING.md` for contribution guidelines.
 
-## Final Note
+🧪 Economic Safety
 
-QuantumPay is built with the belief that **strong infrastructure precedes adoption**.
+The following invariants are enforced and tested:
 
-Quietly.
-Carefully.
-Correctly.
+Total supply consistency
+
+No negative balances
+
+Gas deducted before execution
+
+Rewards never exceed minted supply
+
+Slashing cannot underflow stake
+
+
+Economic logic lives in:
+
+internal/coin/
+
+internal/staking/
+
+
+🔒 Mainnet Policy
+
+Experimental modules are disabled, not deleted
+
+Core APIs are stable (no breaking changes)
+
+Economic logic is frozen for v1
+
+Future upgrades require explicit versioning
+
+
+🏷 Versioning
+
+v1.0.0-core — Mainnet Core (current)
+
+Future protocol upgrades will follow semantic versioning
+
+📖 Documentation
+
+ECONOMICS.md — Coin & gas model
+
+GAS_MODEL.md — Gas accounting
+
+STAKING_MODEL.md — Validator economics
+
+
+🤝 Contribution
+
+Mainnet core is frozen.
+Development continues on feature branches only.
+
+git checkout -b feature/<name>
+
+
+🕌 Acknowledgment
+
+Built with discipline, audit-first mindset, and responsibility.
+May this technology bring benefit, fairness, and trust.
+
+
+📜 License
+
+MIT License
+© QuantumPay Contributors
+
