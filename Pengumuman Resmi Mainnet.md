@@ -2,7 +2,9 @@
 🚀 RESMI: QuantumPay Mainnet Telah Aktif
 
 Tanggal : (2026-01-24)
+
 Jaringan: QuantumPay Blockchain
+
 Status  : ✅ Mainnet Live
 
 Dengan penuh rasa syukur, kami mengumumkan bahwa QuantumPay Mainnet kini telah resmi aktif dan berjalan stabil.
