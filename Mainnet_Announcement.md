@@ -1,7 +1,11 @@
 QuantumPay Mainnet Is Live
+
 Release Version : v1.0.0-core
+
 Date            : 2026-01-24
+
 Network         : QuantumPay Blockchain
+
 Status          : Mainnet Live
 
 We are proud to announce that QuantumPay Mainnet is officially LIVE.
