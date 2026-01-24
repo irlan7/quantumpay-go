@@ -27,7 +27,7 @@ Each entry must include:
 
 ### CC-0001
 
-- **Date:** [YYYY-MM-DD]
+- **Date:** [2026-01-24]
 - **Category:** Governance
 - **Description:** Initial governance documentation finalized
 - **Impact:** Documentation only
@@ -37,7 +37,7 @@ Each entry must include:
 
 ### CC-0002
 
-- **Date:** [YYYY-MM-DD]
+- **Date:** [2026-01-24]
 - **Category:** Network
 - **Description:** P1 (Network & Interface) freeze declared
 - **Impact:** No further P1 feature changes allowed
