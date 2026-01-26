@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package quantumpay.node.v1;
+
+option go_package = "github.com/irlan/quantumpay-go/internal/rpc/nodepb;nodepb";
+
+service NodeService {
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+  rpc GetHeight(GetHeightRequest) returns (GetHeightResponse);
+  rpc GetBlock(GetBlockRequest) returns (GetBlockResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message GetStatusRequest {}
+message GetStatusResponse {
+  string network = 1;
+  uint64 height = 2;
+}
+
+message GetHeightRequest {}
+message GetHeightResponse {
+  uint64 height = 1;
+}
+
+message GetBlockRequest {
+  oneof selector {
+    uint64 height = 1;
+    string hash = 2;
+  }
+}
+
+message GetBlockResponse {
+  uint64 height = 1;
+  string hash = 2;
+}
+
+message GetBalanceRequest {
+  string address = 1;
+}
+
+message GetBalanceResponse {
+  string balance = 1;
+}
+
+message HealthRequest {}
+message HealthResponse {
+  string status = 1;
+}
