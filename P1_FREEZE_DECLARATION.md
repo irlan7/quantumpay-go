@@ -1,7 +1,7 @@
 # P1 Freeze Declaration  
 Quantumpay Protocol
 
-Date: [INSERT DATE]  
+Date: [2026-01-24]  
 Status: FINAL
 
 ## 1. Purpose
