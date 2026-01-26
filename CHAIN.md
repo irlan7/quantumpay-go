@@ -29,7 +29,7 @@ Fragment the network
 
 Violate mainnet immutability guarantees
 
-Therefore, Chain ID 77001 is final for the lifetime of the QuantumPay mainnet.
+Therefore, Chain ID 77077 is final for the lifetime of the QuantumPay mainnet.
 
 
 Scope of Applicability
