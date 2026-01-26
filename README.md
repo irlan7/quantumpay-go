@@ -29,6 +29,14 @@ go build -o quantumpay-node ./cmd/node
 # Start the node (Recommended with PM2)
 pm2 start ./quantumpay-node --name "qp-node"
 
+#Genesis Verification ,Genesis Hash via logs
+pm2 logs qp-node --lines 100 | grep "Genesis Hash"
+
+Verification Check:
+​Expected Hash: 0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a
+
+read Install.sh 
+
 📡 Official Channels
  * Website: https://quantumpaychain.org
  * Explorer: /explorer
