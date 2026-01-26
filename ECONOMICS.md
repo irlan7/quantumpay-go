@@ -2,7 +2,7 @@
 
 **Version:** v1.0 (Locked)  
 **Network:** QuantumPay Mainnet  
-**Chain ID:** 77001  
+**Chain ID:** 77077  
 **Status:** Mainnet Candidate – Economics Frozen
 
 ## 1. Overview
@@ -28,9 +28,9 @@ The QP economic model is designed with:
 
 | Parameter        | Value            |
 |------------------|------------------|
-| Symbol           | QP               |
+| Symbol           | QPAY              |
 | Decimals         | 18               |
-| Total Supply     | 210,000,000 QP   |
+| Total Supply     | 210,000,000 QPAY   |
 | Inflation        | No (fixed supply)|
 | Token Sale       | None             |
 
@@ -57,18 +57,18 @@ Total Genesis Supply: **210,000,000 QP**
 All allocations are transparently defined in `genesis.json`.
 
 
-## 4. Utility of QP
+## 4. Utility of QPAY
 
 QP is required for:
 
 ### 4.1 Transaction Fees (Gas)
-- All transactions consume gas paid in QP
+- All transactions consume gas paid in QPAY
 - Gas pricing is deterministic and consensus-enforced
 - Fees are burned or distributed per protocol rules (v1: distributed)
 
 ### 4.2 Staking
-- Validators must stake QP to participate in consensus
-- Delegators may stake QP to validators (optional in v1)
+- Validators must stake QPAY to participate in consensus
+- Delegators may stake QPAY to validators (optional in v1)
 - Stake weight influences validator selection
 
 ### 4.3 Network Security
