@@ -2,7 +2,7 @@
 
 **Version:** v1.0 (Frozen)  
 **Network:** QuantumPay Mainnet  
-**Chain ID:** 77001  
+**Chain ID:** 77077 
 **Status:** Mainnet Candidate – Economics Locked
 
 ## 1. Purpose & Design Goals
