@@ -2,7 +2,7 @@
 
 **Document:** CONSENSUS.md  
 **Network:** Quantumpay Mainnet  
-**Chain ID:** 77001  
+**Chain ID:** 77077  
 **Consensus Type:** Proof-of-Stake (PoS) with BFT Finality  
 **Status:** Mainnet (Active)  
 **Last Updated:** 2026-01-25
