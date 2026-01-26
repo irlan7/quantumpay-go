@@ -39,7 +39,7 @@ Any other repositories, forks, or projects using similar names are not affiliate
 
 QuantumPay is an independently designed blockchain network, built from first principles with the following characteristics:
 
-Native economic layer (QP coin)
+Native economic layer (QPAY coin)
 
 Custom ledger, state machine, and account model
 
@@ -94,10 +94,15 @@ Genesis: Publicly published & SHA256-locked
 Parameter	Value
 
 Network Name	QuantumPay Mainnet
-Chain ID	77001
-Native Coin	QP
+
+Chain ID	77077
+
+Native Coin	QPAY
+
 Genesis File	config/genesis.json
-Genesis Hash	acc395137e5d0c28c609d011ea99d89405f07009c0bbf8933711e1a7f184edc6
+
+Genesis Hash	0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a
+
 Launch Status	FINAL & FROZEN
 
 
