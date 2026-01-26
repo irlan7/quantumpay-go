@@ -2,7 +2,7 @@
 🚀 QuantumPay Mainnet v1.1
 
 Release Tag: mainnet-v1.1
-Chain ID: 77001 (FINAL & FROZEN)
+Chain ID: 77077 (FINAL & FROZEN)
 Status: ✅ Mainnet Live
 Release Date: 16 January 2026
 
