@@ -29,7 +29,7 @@ Minimum recommended:
 
 Run as root or via sudo:
 
-```bash
+bash
 sudo useradd --system \
   --home /opt/quantumpay \
   --shell /usr/sbin/nologin \
@@ -63,7 +63,7 @@ sudo -u quantumpay nano /opt/quantumpay/config/node.toml
 Example:
 
 Toml
-chain_id = 77001
+chain_id = 77077
 
 [p2p]
 listen_addr = "0.0.0.0:7001"
