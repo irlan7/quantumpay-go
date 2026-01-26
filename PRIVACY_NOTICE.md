@@ -1,6 +1,6 @@
 # Privacy Notice
 
-_Last updated: [TO BE UPDATED AT MAINNET LAUNCH]_
+_Last updated: [2026-01-24]_
 
 ## 1. Purpose
 
