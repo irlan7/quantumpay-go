@@ -3,8 +3,8 @@ QuantumPay is a high-performance, sovereign Layer-1 blockchain infrastructure bu
 As the Single Source of Truth, these parameters define the current state of the frozen mainnet-alpha:
 | Parameter | Value |
 |-------------------|----------------|
-| Chain ID          | 77001 [FROZEN] |
-| Genesis Hash      | acc395137e5d0c28c609d011ea99d89405f07009c0bbf8933711e1a7f184edc6 |
+| Chain ID          | 77077 [FROZEN] |
+| Genesis Hash      | 0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a |
 | Core Engine       | Go-Lang (quantumpay-go-v1.1) |
 | Official Provider | VPS-9451c332 |
 ⚡ Technical Features
