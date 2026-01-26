@@ -5,7 +5,7 @@ Chain ID
 
 Name: QuantumPay Mainnet
 
-Chain ID: 77001
+Chain ID: 77077
 
 Status: ✅ FINAL & FROZEN
 
@@ -14,7 +14,7 @@ Effective Date: 16 January 2026
 
 Policy Statement
 
-> The Chain ID 77001 is permanently frozen and MUST NOT be changed under any circumstances.
+> The Chain ID 77077 is permanently frozen and MUST NOT be changed under any circumstances.
 
 
 Changing the Chain ID after this point would:
@@ -53,7 +53,7 @@ Cross-service and cross-node communication
 
 All environments referring to QuantumPay Mainnet must use:
 
-chain_id = 77001
+chain_id = 77077
 
 
 Governance & Upgrade Rules
@@ -86,12 +86,12 @@ This Chain ID freeze is part of the Mainnet Readiness Checklist and is considere
 
 Auditors and integrators may rely on the following invariant:
 
-> QuantumPay Mainnet Chain ID will always be 77001.
+> QuantumPay Mainnet Chain ID will always be 77077.
 
 
 Change Log
 
 Date	Change
 
-2026-01-16	Chain ID 77001 frozen (final)
+2026-01-16	Chain ID 77077 frozen (final)
 
