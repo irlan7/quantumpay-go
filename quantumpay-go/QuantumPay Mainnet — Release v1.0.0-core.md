@@ -50,13 +50,13 @@ CLI entrypoint: cmd/quantumpay/main.go
 
 🧾 Genesis
 
-Chain ID: 77001
+Chain ID: 77077
 
 Network: quantumpay-mainnet
 
 Supply: 210,000,000 QP
 
-Genesis Hash: acc395137e5d0c28c609d011ea99d89405f07009c0bbf8933711e1a7f184edc6
+Genesis Hash: 0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a
 
 
 🔒 Security & Policy
