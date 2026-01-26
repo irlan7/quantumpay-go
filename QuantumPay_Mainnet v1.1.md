@@ -11,7 +11,7 @@ Release Date: 16 January 2026
 
 This release officially declares QuantumPay Mainnet v1.1 as stable, final, and production-ready.
 
-Chain ID 77001 is permanently frozen
+Chain ID 77077 is permanently frozen
 
 Consensus, block engine, and P2P layers are finalized
 
