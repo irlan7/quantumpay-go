@@ -29,7 +29,7 @@ https://github.com/irlan7/quantumpay-go
 
 Official Website
 
-https://quantumpay-chain.com (or current official domain)
+https://quantumpaychain.org (or current official domain)
 
 
 Any other repositories, forks, or projects using similar names are not affiliated unless explicitly listed above.
