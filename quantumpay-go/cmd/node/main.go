@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt" // Import fmt ditambahkan untuk spanduk visual
 	"log"
 	"os"
 	"os/signal"
@@ -24,6 +25,16 @@ func main() {
 
 	flag.Parse()
 
+	// ==========================================================
+	// 🚀 SPANDUK IDENTITAS JARINGAN (VISUAL AUDIT)
+	// Ditambahkan untuk transparansi Genesis Hash bagi semua user
+	// ==========================================================
+	fmt.Println("\n==========================================================")
+	fmt.Println("🚀 QUANTUMPAY NETWORK NODE V1.1")
+	fmt.Println("🔗 Chain ID     : 77077 [FROZEN]")
+	fmt.Println("💎 Genesis Hash : 0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a")
+	fmt.Println("==========================================================\n")
+
 	log.Println("[NODE] Starting QuantumPay node")
 
 	// ===== CORE BLOCKCHAIN (UNTOUCHED) =====
@@ -34,13 +45,11 @@ func main() {
 	// ===== P2P PLACEHOLDER (SAFE) =====
 	if *enableP2P {
 		log.Println("[P2P] enabled (v1 placeholder)")
-		log.Printf("[P2P] listen port : %d\n", *p2pPort)
+		log.Printf("[P2P] listen port: %d\n", *p2pPort)
 
 		if *p2pPeer != "" {
-			log.Printf("[P2P] peer target : %s\n", *p2pPeer)
+			log.Printf("[P2P] peer target: %s\n", *p2pPeer)
 		}
-
-		log.Println("[P2P] runtime NOT wired yet (expected in P2P v1 phase)")
 	}
 
 	// ===== gRPC PLACEHOLDER (SAFE & ISOLATED) =====
@@ -48,9 +57,8 @@ func main() {
 		// ⚠️ TIDAK ADA import grpc / protobuf
 		// ⚠️ TIDAK ADA pemanggilan rpc
 		// ⚠️ HANYA lifecycle placeholder
-
 		log.Println("[gRPC] enabled (SAFE placeholder)")
-		log.Printf("[gRPC] planned listen addr : %s\n", *grpcAddr)
+		log.Printf("[gRPC] planned listen addr: %s\n", *grpcAddr)
 		log.Println("[gRPC] server not started yet (no-op)")
 		log.Println("[gRPC] integration will be wired in P1.3+ without touching core")
 	}
