@@ -5,12 +5,37 @@ package quantumpay.grpc;
 option go_package = "github.com/irlan/quantumpay-go/internal/grpc/proto;proto";
 
 service NodeService {
-  rpc GetStatus (Empty) returns (NodeStatus);
+    // Handshake untuk validasi identitas jaringan
+    rpc Handshake (HandshakeRequest) returns (HandshakeResponse);
+    // Mendapatkan status dasar node
+    rpc GetStatus (Empty) returns (NodeStatus);
+    // Mendapatkan data blok spesifik
+    rpc GetBlockByHeight (BlockRequest) returns (BlockResponse);
 }
 
 message Empty {}
 
+message HandshakeRequest {
+    uint64 chain_id = 1;
+    string genesis_hash = 2;
+    string node_version = 3;
+}
+
+message HandshakeResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 message NodeStatus {
-  uint64 height = 1;
-  string last_hash = 2;
+    uint64 height = 1;
+    string last_hash = 2;
+}
+
+message BlockRequest {
+    uint64 height = 1;
+}
+
+message BlockResponse {
+    bool found = 1;
+    bytes data = 2;
 }

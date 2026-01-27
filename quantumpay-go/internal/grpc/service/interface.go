@@ -1,8 +1,11 @@
 package service
 
-import "github.com/irlan/quantumpay-go/internal/core"
-
+// ChainAPI adalah kontrak agar Service bisa bicara dengan Blockchain
+// Menggunakan 'any' adalah KUNCI ANTI IMPORT CYCLE
 type ChainAPI interface {
+	// Mendapatkan tinggi blok saat ini
 	Height() uint64
-	GetBlockByHeight(uint64) (*core.Block, bool)
+	
+	// Wajib 'any' agar cocok dengan Adapter di main.go
+	GetBlockByHeight(height uint64) (any, bool)
 }

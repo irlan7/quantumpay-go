@@ -1,35 +1,43 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
+	pb "github.com/irlan/quantumpay-go/internal/grpc/proto"
 )
 
-type GRPCServer struct {
-	addr string
-	srv  *grpc.Server
+// Server struct membungkus gRPC server
+type Server struct {
+	listenAddr string
+	grpcServer *grpc.Server
 }
 
-func New(addr string) *GRPCServer {
-	return &GRPCServer{
-		addr: addr,
-		srv:  grpc.NewServer(),
+// NewServer membuat instance server baru
+func NewServer(listenAddr string) *Server {
+	return &Server{
+		listenAddr: listenAddr,
+		grpcServer: grpc.NewServer(),
 	}
 }
 
-func (g *GRPCServer) Start() error {
-	lis, err := net.Listen("tcp", g.addr)
+// Start menjalankan server pada port yang ditentukan
+func (s *Server) Start(nodeService pb.NodeServiceServer) error {
+	lis, err := net.Listen("tcp", s.listenAddr)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to listen: %v", err)
 	}
 
-	log.Println("🧩 gRPC server listening on", g.addr)
-	return g.srv.Serve(lis)
+	// Daftarkan service kita ke server gRPC
+	pb.RegisterNodeServiceServer(s.grpcServer, nodeService)
+
+	log.Printf("✅ gRPC Server listening on %s", s.listenAddr)
+	return s.grpcServer.Serve(lis)
 }
 
-func (g *GRPCServer) Stop() {
-	log.Println("🛑 gRPC server stopped")
-	g.srv.GracefulStop()
+// Stop mematikan server dengan aman
+func (s *Server) Stop() {
+	s.grpcServer.GracefulStop()
 }
