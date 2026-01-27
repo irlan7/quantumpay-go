@@ -11,15 +11,10 @@ To ensure the integrity of the decentralized network and prevent chain fragmenta
 | Parameter              | Value |
 |------------------------|--------------------|
 | Network Name           | QuantumPay Network |
-
 | Chain ID               | 77077 [FROZEN] |
-
 | Genesis Hash (Block 0) | 0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a |
-
 | Consensus Mechanism    | Proof of Stake (PoS) + BFT |
-
 | Official Domain        | quantumpaychain.org |
-
 | Core Repository        | github.com/irlan7/quantumpay-go |
 
 3. Core Architecture
