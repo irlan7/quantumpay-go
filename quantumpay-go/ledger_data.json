@@ -1,44 +1,22 @@
 {
  "balances": {
-  "0000000": 10,
-  "0123": 10,
-  "0x00000000000000000000": 1000000,
-  "0x31b79b4a3b8b01e5f79e964b2cc4ae3c27913545": 100,
-  "0x7e4d8bb999ddca2deed56201f9e588431440cd97": 100,
-  "0xa33e4b18042bb75b52b95fae83ad47072de4e4ea": 10
+  "0xOwner": {
+   "qBNB": 500
+  }
  },
  "history": [
   {
-   "tx_hash": "0x188e924385b1fc2c",
-   "from": "0x31b79b4a3b8b01e5f79e964b2cc4ae3c27913545",
-   "to": "0123",
-   "amount": 10,
-   "timestamp": "2026-01-27T18:15:22+07:00",
-   "status": "Success"
-  },
-  {
-   "tx_hash": "0x188e907830b5ac68",
-   "from": "FAUCET_SYSTEM",
-   "to": "0x7e4d8bb999ddca2deed56201f9e588431440cd97",
-   "amount": 100,
-   "timestamp": "2026-01-27T17:42:29+07:00",
-   "status": "Success"
-  },
-  {
-   "tx_hash": "0x188e907e3c15ee64",
-   "from": "0x7e4d8bb999ddca2deed56201f9e588431440cd97",
-   "to": "0000000",
-   "amount": 10,
-   "timestamp": "2026-01-27T17:42:55+07:00",
-   "status": "Success"
-  },
-  {
-   "tx_hash": "0x188e90d3e29f7cc8",
-   "from": "FAUCET_SYSTEM",
-   "to": "0x31b79b4a3b8b01e5f79e964b2cc4ae3c27913545",
-   "amount": 100,
-   "timestamp": "2026-01-27T17:49:03+07:00",
-   "status": "Success"
+   "tx_hash": "mint_1769600505813109300",
+   "from": "VAULT",
+   "to": "0xOwner",
+   "amount": 500,
+   "symbol": "qBNB",
+   "timestamp": "2026-01-28T18:41:45+07:00",
+   "status": "Success",
+   "security": {
+    "classic_sig": "mint_1769600505813109300_ecdsa_secured",
+    "quantum_sig": "fdbccbf443a31702291c851e8a00c968cf15fb3ced2e54bc9e1380e6d1367565c4f321966aa7c2689919d7123e40f4f0e3a23b479c7e146e0ee0d2a03d95ed85"
+   }
   }
  ]
 }

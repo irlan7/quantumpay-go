@@ -9,11 +9,10 @@ import (
 	"sync"
 	"time"
 
-	// Pastikan path ini benar
+	// Pastikan path ini benar sesuai go.mod Bapak
 	"github.com/irlan/quantumpay-go/internal/crypto"
 )
 
-// KONFIGURASI FILE DB
 const DB_FILE = "ledger_data.json"
 
 type ServerConfig struct {
@@ -21,200 +20,205 @@ type ServerConfig struct {
 }
 
 type LedgerData struct {
-	Balances  map[string]float64 `json:"balances"`
-	TxHistory []Transaction      `json:"history"`
+	Balances  map[string]map[string]float64 `json:"balances"`
+	TxHistory []Transaction                 `json:"history"`
 }
 
 type Transaction struct {
-	TxHash    string  `json:"tx_hash"`
-	From      string  `json:"from"`
-	To        string  `json:"to"`
-	Amount    float64 `json:"amount"`
-	Timestamp string  `json:"timestamp"`
-	Status    string  `json:"status"`
+	TxHash    string                   `json:"tx_hash"`
+	From      string                   `json:"from"`
+	To        string                   `json:"to"`
+	Amount    float64                  `json:"amount"`
+	Symbol    string                   `json:"symbol"`
+	Timestamp string                   `json:"timestamp"`
+	Status    string                   `json:"status"`
+	// PQC FIELD: Menyimpan bukti keamanan quantum
+	Security  crypto.SovereignSignature `json:"security"`
 }
 
-// GLOBAL STATE
 var (
-	balances  = map[string]float64{"0x00000000000000000000": 1000000}
+	balances  = make(map[string]map[string]float64)
 	txHistory = []Transaction{}
 	mutex     = &sync.Mutex{}
+	adminKey  = "QUANTUM_SECRET_2026"
 )
 
-// --- DB FUNCTIONS ---
+// --- DATABASE LOAD/SAVE ---
+
+func LoadData() {
+	file, err := os.ReadFile(DB_FILE)
+	if err != nil {
+		log.Println("⚠️ [DB] Membuat Ledger Baru.")
+		return
+	}
+	var data LedgerData
+	if err := json.Unmarshal(file, &data); err == nil {
+		if data.Balances != nil { balances = data.Balances }
+		txHistory = data.TxHistory
+		log.Printf("📂 [DB] LOADED: %d Akun", len(balances))
+	}
+}
+
 func SaveData() {
 	mutex.Lock()
 	defer mutex.Unlock()
 	data := LedgerData{Balances: balances, TxHistory: txHistory}
 	file, _ := json.MarshalIndent(data, "", " ")
 	_ = os.WriteFile(DB_FILE, file, 0644)
+	log.Println("💾 [DB] Data Tersimpan Aman.")
 }
 
-func LoadData() {
-	file, err := os.ReadFile(DB_FILE)
-	if err != nil { return }
-	var data LedgerData
-	if err := json.Unmarshal(file, &data); err == nil {
-		balances = data.Balances
-		txHistory = data.TxHistory
-	}
-	log.Printf("📂 [DB] LOADED: %d Acc | %d Tx", len(balances), len(txHistory))
-}
+// --- SERVER START ---
 
-// --- SERVER SETUP ---
 func StartServer(config *ServerConfig) {
 	LoadData()
-
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", handleHealth)
 	
-	// WALLET ROUTES
+	// Daftarkan semua route
+	mux.HandleFunc("/health", handleHealth)
 	mux.HandleFunc("/wallet/create", handleCreateWallet)
-	mux.HandleFunc("/wallet/import", handleImportWallet) // <--- ROUTE BARU
-
-	// FINANCE ROUTES
-	mux.HandleFunc("/balance", handleGetBalance)
+	mux.HandleFunc("/wallet/import", handleImportWallet)
+	mux.HandleFunc("/balances", handleGetBalances)
 	mux.HandleFunc("/faucet", handleFaucet)
 	mux.HandleFunc("/tx/send", handleSendTx)
-	
-	// EXPLORER ROUTES
+	mux.HandleFunc("/admin/mint-native", handleAdminMint)
 	mux.HandleFunc("/tx/history", handleGetHistory)
 	mux.HandleFunc("/tx/detail", handleGetTxDetail)
 
-	log.Printf("🚀 [API] Server listening on %s", config.Port)
+	log.Printf("🚀 [API] QuantumPay Node Active on %s", config.Port)
 	if err := http.ListenAndServe(config.Port, mux); err != nil {
-		log.Printf("🔥 [API] Error: %v", err)
+		log.Fatal(err)
 	}
 }
 
-// --- HANDLERS ---
+// --- HANDLERS (ANTI ERROR UNDEFINED) ---
 
 func handleHealth(w http.ResponseWriter, r *http.Request) {
-	jsonResponse(w, map[string]string{"status": "online", "ver": "2.2"})
+	setupCORS(&w); jsonResponse(w, map[string]string{"status": "online", "security": "PQC_ENABLED"})
 }
 
-func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
-	wallet, err := crypto.NewKeyPair()
-	if err != nil { http.Error(w, "Error", 500); return }
-	
-	// Cek apakah alamat ini sudah pernah ada? Kalau belum, kasih bonus.
-	if _, exists := balances[wallet.Address()]; !exists {
-		balances[wallet.Address()] = 10.0
-		SaveData()
+func handleAdminMint(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w); if r.Method == "OPTIONS" { return }
+
+	var req struct {
+		To string `json:"to"`; Amount float64 `json:"amount"`; Symbol string `json:"symbol"`; Key string `json:"key"`
 	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil { http.Error(w, "Error", 400); return }
+	if req.Key != adminKey { http.Error(w, "Unauthorized", 401); return }
 
-	response := map[string]string{
-		"address":     wallet.Address(),
-		"public_key":  wallet.GetPublicKeyHex(),
-		"private_key": wallet.PrivateKeyHex(),
-		"mnemonic":    wallet.Mnemonic,
-		"created_at":  time.Now().Format(time.RFC3339),
-	}
-	jsonResponse(w, response)
-}
+	mutex.Lock()
+	if _, exists := balances[req.To]; !exists { balances[req.To] = make(map[string]float64) }
+	balances[req.To][req.Symbol] += req.Amount
+	mutex.Unlock()
 
-// HANDLER BARU: IMPORT WALLET DARI 12 KATA
-func handleImportWallet(w http.ResponseWriter, r *http.Request) {
-	phrase := r.URL.Query().Get("phrase")
-	if phrase == "" {
-		http.Error(w, "Mnemonic phrase required", 400)
-		return
-	}
+	// --- INTEGRASI ANTI-QUANTUM ---
+	txHash := fmt.Sprintf("mint_%d", time.Now().UnixNano())
+	// Panggil fungsi SignHybrid dari modul crypto
+	pqcProof := crypto.SignHybrid(txHash, "ADMIN_KEY")
 
-	// Panggil crypto untuk memulihkan kunci
-	wallet, err := crypto.NewKeyPairFromMnemonic(phrase)
-	if err != nil {
-		jsonResponse(w, map[string]string{"error": "Invalid Mnemonic Phrase"})
-		return
-	}
-
-	// Cek saldo yang tersimpan (jangan direset ke 0 atau 10, ambil apa adanya)
-	// Jika user baru import tapi datanya belum ada di server ini, default 0
-	if _, exists := balances[wallet.Address()]; !exists {
-		balances[wallet.Address()] = 0.0 
-	}
-
-	response := map[string]string{
-		"address":     wallet.Address(),
-		"public_key":  wallet.GetPublicKeyHex(),
-		"private_key": wallet.PrivateKeyHex(),
-		"mnemonic":    phrase, // Balikin lagi frasanya
-		"message":     "Wallet recovered successfully",
-	}
-	jsonResponse(w, response)
-}
-
-func handleGetBalance(w http.ResponseWriter, r *http.Request) {
-	address := r.URL.Query().Get("address")
-	jsonResponse(w, map[string]interface{}{"address": address, "balance": balances[address], "symbol": "QPY"})
-}
-
-func handleFaucet(w http.ResponseWriter, r *http.Request) {
-	address := r.URL.Query().Get("address")
-	balances[address] += 100.0
-	
-	txHash := fmt.Sprintf("0x%x", time.Now().UnixNano())
 	newTx := Transaction{
-		TxHash: txHash, From: "FAUCET", To: address, Amount: 100.0,
+		TxHash: txHash, From: "VAULT", To: req.To, Amount: req.Amount, Symbol: req.Symbol,
 		Timestamp: time.Now().Format(time.RFC3339), Status: "Success",
-	}
-	txHistory = append(txHistory, newTx)
-	SaveData()
-
-	jsonResponse(w, map[string]interface{}{"message": "Success", "new_balance": balances[address]})
-}
-
-func handleSendTx(w http.ResponseWriter, r *http.Request) {
-	from := r.URL.Query().Get("from")
-	to := r.URL.Query().Get("to")
-	amountStr := r.URL.Query().Get("amount")
-	var amount float64
-	fmt.Sscanf(amountStr, "%f", &amount)
-
-	if balances[from] < amount {
-		jsonResponse(w, map[string]interface{}{"status": "failed", "error": "Saldo Kurang"})
-		return
-	}
-
-	balances[from] -= amount
-	balances[to] += amount
-
-	txHash := "0x" + fmt.Sprintf("%x", time.Now().UnixNano())
-	newTx := Transaction{
-		TxHash: txHash, From: from, To: to, Amount: amount,
-		Timestamp: time.Now().Format(time.RFC3339), Status: "Success",
+		Security: pqcProof, // Simpan bukti quantum ke ledger
 	}
 	txHistory = append([]Transaction{newTx}, txHistory...)
 	SaveData()
+	jsonResponse(w, map[string]string{"status": "success", "tx_hash": txHash})
+}
 
-	log.Printf("💸 [TX] %s -> %s | %.2f", from, to, amount)
-	jsonResponse(w, map[string]interface{}{"status": "success", "tx_hash": txHash, "new_balance": balances[from]})
+func handleSendTx(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w); if r.Method == "OPTIONS" { return }
+	
+	from, to, sym := r.URL.Query().Get("from"), r.URL.Query().Get("to"), r.URL.Query().Get("symbol")
+	if sym == "" { sym = "QPAY" }
+	var amt float64
+	fmt.Sscanf(r.URL.Query().Get("amount"), "%f", &amt)
+
+	mutex.Lock()
+	if balances[from] == nil || balances[from][sym] < amt { 
+		mutex.Unlock(); jsonResponse(w, map[string]string{"error": "Saldo Kurang"}); return 
+	}
+	balances[from][sym] -= amt
+	if _, exists := balances[to]; !exists { balances[to] = make(map[string]float64) }
+	balances[to][sym] += amt
+	mutex.Unlock()
+
+	// --- INTEGRASI ANTI-QUANTUM ---
+	txHash := fmt.Sprintf("tx_%d", time.Now().UnixNano())
+	pqcProof := crypto.SignHybrid(txHash, "USER_KEY")
+
+	newTx := Transaction{
+		TxHash: txHash, From: from, To: to, Amount: amt, Symbol: sym,
+		Timestamp: time.Now().Format(time.RFC3339), Status: "Success",
+		Security: pqcProof,
+	}
+	txHistory = append([]Transaction{newTx}, txHistory...)
+	SaveData()
+	jsonResponse(w, map[string]string{"status": "success", "tx_hash": txHash})
+}
+
+func handleGetBalances(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w); if r.Method == "OPTIONS" { return }
+	addr := r.URL.Query().Get("address")
+	mutex.Lock()
+	res, exists := balances[addr]
+	if !exists { res = map[string]float64{"QPAY": 0} }
+	mutex.Unlock()
+	jsonResponse(w, res)
+}
+
+func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w)
+	// Panggil crypto lokal
+	wallet, _ := crypto.NewKeyPair()
+	addr := wallet.Address()
+	mutex.Lock()
+	if _, exists := balances[addr]; !exists { balances[addr] = map[string]float64{"QPAY": 10.0} }
+	mutex.Unlock()
+	SaveData()
+	jsonResponse(w, map[string]string{"address": addr, "mnemonic": wallet.Mnemonic, "private_key": wallet.PrivateKeyHex()})
+}
+
+func handleImportWallet(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w); phrase := r.URL.Query().Get("phrase")
+	wallet, _ := crypto.NewKeyPairFromMnemonic(phrase)
+	jsonResponse(w, map[string]string{"address": wallet.Address(), "message": "Success"})
+}
+
+func handleFaucet(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w); addr := r.URL.Query().Get("address")
+	mutex.Lock()
+	if _, exists := balances[addr]; !exists { balances[addr] = make(map[string]float64) }
+	balances[addr]["QPAY"] += 100.0
+	mutex.Unlock()
+	SaveData()
+	jsonResponse(w, map[string]string{"message": "Success"})
 }
 
 func handleGetHistory(w http.ResponseWriter, r *http.Request) {
-	address := r.URL.Query().Get("address")
-	myHistory := []Transaction{}
+	setupCORS(&w); addr := r.URL.Query().Get("address")
+	userHistory := []Transaction{}
 	for _, tx := range txHistory {
-		if tx.From == address || tx.To == address {
-			myHistory = append(myHistory, tx)
-		}
+		if tx.From == addr || tx.To == addr { userHistory = append(userHistory, tx) }
 	}
-	jsonResponse(w, myHistory)
+	jsonResponse(w, userHistory)
 }
 
 func handleGetTxDetail(w http.ResponseWriter, r *http.Request) {
-	hash := r.URL.Query().Get("hash")
+	setupCORS(&w); hash := r.URL.Query().Get("hash")
 	for _, tx := range txHistory {
-		if tx.TxHash == hash {
-			jsonResponse(w, tx)
-			return
-		}
+		if tx.TxHash == hash { jsonResponse(w, tx); return }
 	}
-	jsonResponse(w, map[string]string{"error": "Not Found"})
+	http.Error(w, "Not Found", 404)
+}
+
+func setupCORS(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
 func jsonResponse(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(data)
 }
