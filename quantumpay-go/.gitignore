@@ -40,3 +40,16 @@ Thumbs.db
 ############################
 *.log
 tmp/
+# --- Sovereign Database ---
+ledger_data.json
+*.db
+
+# --- Next.js / Frontend Build ---
+.next/
+out/
+build/
+
+# --- Environment & Security ---
+.env
+*.pem
+*.key

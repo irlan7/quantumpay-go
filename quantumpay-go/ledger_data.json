@@ -1,22 +1,11 @@
 {
  "balances": {
-  "0xOwner": {
-   "qBNB": 500
-  }
+  "0x00000000000000000000": 1000000,
+  "0x194a53ee6e87c40bc5495c42a386ab66fac591b1": 0,
+  "0xa987c2fbd2d67523d377dc27d96843b9cb7e9a36": 0,
+  "0xa9a051d8dbc44d95bedb2e379ea187a079afb4a4": 0,
+  "0xcd8526d4f76c7fd13c07f7382ccd6b7de7d0838f": 0,
+  "0xf1c57a2266406d6267e80cb9ab6a23d602f4537c": 0
  },
- "history": [
-  {
-   "tx_hash": "mint_1769600505813109300",
-   "from": "VAULT",
-   "to": "0xOwner",
-   "amount": 500,
-   "symbol": "qBNB",
-   "timestamp": "2026-01-28T18:41:45+07:00",
-   "status": "Success",
-   "security": {
-    "classic_sig": "mint_1769600505813109300_ecdsa_secured",
-    "quantum_sig": "fdbccbf443a31702291c851e8a00c968cf15fb3ced2e54bc9e1380e6d1367565c4f321966aa7c2689919d7123e40f4f0e3a23b479c7e146e0ee0d2a03d95ed85"
-   }
-  }
- ]
+ "history": []
 }
