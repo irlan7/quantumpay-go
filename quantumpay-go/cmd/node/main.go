@@ -11,7 +11,7 @@ import (
 
 	"github.com/irlan/quantumpay-go/internal/api"
 	"github.com/irlan/quantumpay-go/internal/blockchain"
-	// "github.com/irlan/quantumpay-go/internal/core" <-- INI DIHAPUS AGAR TIDAK ERROR
+	// "github.com/irlan/quantumpay-go/internal/core" <-- Tetap matikan agar tidak error 'unused import'
 	"github.com/irlan/quantumpay-go/internal/engine"
 	"github.com/irlan/quantumpay-go/internal/grpc/server"
 	"github.com/irlan/quantumpay-go/internal/grpc/service"
@@ -40,9 +40,7 @@ func (a *ChainAdapter) GetBlockByHeight(height uint64) (any, bool) {
 	if err != nil {
 		return nil, false
 	}
-	// Kita return 'blk' langsung. Karena return type fungsi ini 'any',
-	// Go otomatis membungkus *core.Block menjadi any.
-	// Tidak perlu import 'core' di file ini.
+	// Go otomatis membungkus *core.Block menjadi any (interface{})
 	return blk, true
 }
 
@@ -63,6 +61,7 @@ func main() {
 	fmt.Printf("👑 Sovereign Address: %s\n", sovereignAddr)
 
 	// 2. Init WorldState (BadgerDB Persistence)
+	// 'ws' ini memegang kunci database fisik di SSD
 	ws, err := state.NewWorldState(*dbPath)
 	if err != nil {
 		log.Fatalf("❌ Gagal inisialisasi BadgerDB: %v", err)
@@ -74,8 +73,6 @@ func main() {
 	chain := blockchain.NewBlockchain(ws, sovereignAddr)
 	
 	// --- AMBIL GENESIS HASH ---
-	// Variabel 'genesisBlock' otomatis terdeteksi sebagai *core.Block
-	// karena return value dari chain.GetBlockByHeight.
 	genesisBlock, err := chain.GetBlockByHeight(0)
 	if err != nil {
 		log.Fatalf("❌ CRITICAL: Genesis block not found in BadgerDB!")
@@ -86,6 +83,7 @@ func main() {
 	fmt.Println("--------------------------------------------------")
 
 	// 4. Init Engine & Mempool
+	// 'mp' adalah kolam penampungan transaksi di RAM
 	mp := mempool.New()
 	eng := engine.New(chain, mp)
 
@@ -103,9 +101,16 @@ func main() {
 		srv.Start(svc)
 	}()
 
-	// 6. Jalankan API Server (Port 8081)
+	// 6. Jalankan API Server (Port 8081) - [BAGIAN KRUSIAL]
 	go func() {
-		cfg := &api.ServerConfig{Port: *apiAddr}
+		// PERBAIKAN DISINI: Kita masukkan mp dan ws ke dalam config
+		// Ini menyambungkan API -> Mempool -> Engine -> BadgerDB
+		cfg := &api.ServerConfig{
+			Port:    *apiAddr,
+			Mempool: mp, // Supaya API bisa kirim TX ke mining pool
+			State:   ws, // Supaya API bisa baca saldo dari DB
+		}
+		
 		log.Printf("🌐 [API] Interface Live: %s", *apiAddr)
 		api.StartServer(cfg) 
 	}()
@@ -114,7 +119,7 @@ func main() {
 	go func() {
 		log.Println("⛏️  [MINER] Consensus Engine Activated")
 		for {
-			// ProduceBlock dari engine baru
+			// ProduceBlock sekarang mengambil TX dari Mempool secara otomatis
 			blk, err := eng.ProduceBlock()
 			
 			if err == nil && blk != nil {
