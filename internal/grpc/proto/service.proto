@@ -1,0 +1,26 @@
+syntax = "proto3";
+package node;
+option go_package = "./internal/grpc/proto";
+import "google/protobuf/empty.proto";
+
+service Node {
+  rpc GetHeight(google.protobuf.Empty) returns (ChainHeight);
+  rpc SubmitTransaction(TransactionRequest) returns (TransactionResponse);
+}
+
+message ChainHeight {
+  uint64 height = 1;
+}
+
+message TransactionRequest {
+  string from = 1;
+  string to = 2;
+  uint64 value = 3;
+  uint64 nonce = 4;
+  bytes signature = 5;
+}
+
+message TransactionResponse {
+  bool success = 1;
+  string hash = 2;
+}

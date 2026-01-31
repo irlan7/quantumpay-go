@@ -1,0 +1,18 @@
+package blockchain
+
+import "github.com/irlan/quantumpay-go/internal/rpc"
+
+func (bc *Blockchain) Height() uint64 {
+	return bc.LastHeight()
+}
+
+func (bc *Blockchain) GetBlockByHeight(h uint64) (rpc.BlockView, bool) {
+	blk, ok := bc.GetBlock(h)
+	if !ok {
+		return rpc.BlockView{}, false
+	}
+	return rpc.BlockView{
+		Height: blk.Height,
+		Hash:   blk.Hash,
+	}, true
+}

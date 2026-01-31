@@ -1,0 +1,16 @@
+node_id: node2
+
+rpc:
+  host: 127.0.0.1
+  port: 8081
+
+p2p:
+  host: 127.0.0.1
+  port: 7002
+  peers:
+    - 127.0.0.1:7001
+
+data_dir: ./data/node2
+
+mining:
+  enabled: false
