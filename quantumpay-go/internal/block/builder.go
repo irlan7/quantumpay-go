@@ -1,31 +1,49 @@
 package block
 
 import (
-	"time"
+	"fmt" // Wajib ada untuk Printf di MineBlock
 
 	"github.com/irlan/quantumpay-go/internal/core"
-	"github.com/irlan/quantumpay-go/internal/mempool"
 )
 
+// Builder bertugas menyusun blok (Mining candidate)
 type Builder struct {
-	view ChainView
-	mp   *mempool.Mempool
+	// Nanti bisa tambah konfigurasi miner address disini
 }
 
-func NewBuilder(view ChainView, mp *mempool.Mempool) *Builder {
-	return &Builder{
-		view: view,
-		mp:   mp,
-	}
+// NewBuilder membuat instance builder baru
+func NewBuilder() *Builder {
+	return &Builder{}
 }
 
-func (b *Builder) Build() *core.Block {
-	txs := b.mp.PopAll()
+// CreateBlock menyusun proposal blok baru
+// NOTE: Argumen input disesuaikan dengan kebutuhan (Height, PrevHash, Txs)
+func (b *Builder) CreateBlock(height uint64, prevHash []byte, txs []*core.Transaction) *core.Block {
+	
+	// FIX ERROR: "Too many arguments" & "Type mismatch"
+	// Urutan yang benar sesuai core/block.go adalah:
+	// 1. prevHash ([]byte)
+	// 2. height (uint64)
+	// 3. txs ([]*core.Transaction)
+	
+	blk := core.NewBlock(prevHash, height, txs)
 
-	return core.NewBlock(
-		b.view.Height()+1,
-		b.view.LastHash(),
-		txs,
-		uint64(time.Now().Unix()),
-	)
+	return blk
+}
+
+// MineBlock simulasi Proof of Work / Finalisasi blok
+func (b *Builder) MineBlock(blk *core.Block) {
+	// Gunakan fmt agar log mining terlihat di terminal VPS
+	fmt.Printf("⛏️  Mining Block #%d [Tx: %d]...\n", blk.Header.Height, len(blk.Transactions))
+	
+	// Logika Mining Sederhana (Sovereign Authority)
+	// Di Mainnet nanti, kita bisa ganti ini dengan PoW atau PoS.
+	// Untuk sekarang, kita set Nonce dan hitung Hash final.
+	
+	blk.Header.Nonce = 0 // Reset nonce
+	
+	// Hitung Hash Final agar valid di Blockchain
+	blk.Hash = blk.CalculateHash()
+	
+	fmt.Printf("✅ Block Sealed: %x\n", blk.Hash[:8])
 }

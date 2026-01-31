@@ -2,57 +2,62 @@ package core
 
 import (
 	"crypto/sha256"
-	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"time"
 )
 
-// Block merepresentasikan blok immutable di QuantumPay
+// BlockHeader menyimpan metadata blok
+type BlockHeader struct {
+	Timestamp int64  `json:"timestamp"`
+	PrevHash  []byte `json:"prev_hash"`
+	Height    uint64 `json:"height"`
+	Nonce     uint64 `json:"nonce"`
+}
+
+// Block menyimpan data transaksi dan header
 type Block struct {
-	Height       uint64
-	PrevHash     []byte
-	Transactions []*Transaction
-	Timestamp    uint64
-	Hash         []byte
+	Header       BlockHeader    `json:"header"`
+	Transactions []*Transaction `json:"transactions"` // Mengacu ke struct di transaction.go
+	Hash         []byte         `json:"hash"`
 }
 
-// NewBlock membuat block baru dan langsung menghitung hash
-func NewBlock(
-	height uint64,
-	prevHash []byte,
-	txs []*Transaction,
-	timestamp uint64,
-) *Block {
-
-	b := &Block{
-		Height:       height,
-		PrevHash:     prevHash,
+// NewBlock membuat instance blok baru
+func NewBlock(prevHash []byte, height uint64, txs []*Transaction) *Block {
+	block := &Block{
+		Header: BlockHeader{
+			Timestamp: time.Now().Unix(),
+			PrevHash:  prevHash,
+			Height:    height,
+		},
 		Transactions: txs,
-		Timestamp:    timestamp,
 	}
-
-	b.Hash = b.calculateHash()
-	return b
+	block.Hash = block.CalculateHash()
+	return block
 }
 
-// calculateHash menghitung hash block secara deterministik
-func (b *Block) calculateHash() []byte {
-	h := sha256.New()
+// CalculateHash menghasilkan hash SHA-256 dari header dan transaksi
+func (b *Block) CalculateHash() []byte {
+	// Gabungkan data Header
+	record := fmt.Sprintf("%d%x%d%d", 
+		b.Header.Timestamp, 
+		b.Header.PrevHash, 
+		b.Header.Height, 
+		b.Header.Nonce,
+	)
 
-	// Height
-	buf := make([]byte, 8)
-	binary.BigEndian.PutUint64(buf, b.Height)
-	h.Write(buf)
-
-	// PrevHash
-	h.Write(b.PrevHash)
-
-	// Timestamp
-	binary.BigEndian.PutUint64(buf, b.Timestamp)
-	h.Write(buf)
-
-	// Transactions
+	// Gabungkan ID Transaksi (Tx Hash)
 	for _, tx := range b.Transactions {
-		h.Write(tx.Hash())
+		// Asumsi Transaction punya method Hash() atau kita pakai fieldnya
+		record += fmt.Sprintf("%s%s%d%d", tx.From, tx.To, tx.Value, tx.Nonce)
 	}
 
+	h := sha256.New()
+	h.Write([]byte(record))
 	return h.Sum(nil)
+}
+
+// HashString helper untuk melihat hash dalam bentuk hex
+func (b *Block) HashString() string {
+	return hex.EncodeToString(b.Hash)
 }

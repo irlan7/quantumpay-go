@@ -9,114 +9,130 @@ import (
 	"syscall"
 	"time"
 
-	// --- IMPORT PATH LENGKAP (Pastikan go.mod Anda bernama github.com/irlan/quantumpay-go) ---
 	"github.com/irlan/quantumpay-go/internal/api"
 	"github.com/irlan/quantumpay-go/internal/blockchain"
+	// "github.com/irlan/quantumpay-go/internal/core" <-- INI DIHAPUS AGAR TIDAK ERROR
 	"github.com/irlan/quantumpay-go/internal/engine"
 	"github.com/irlan/quantumpay-go/internal/grpc/server"
 	"github.com/irlan/quantumpay-go/internal/grpc/service"
 	"github.com/irlan/quantumpay-go/internal/mempool"
+	"github.com/irlan/quantumpay-go/internal/state"
 )
 
-// --- ADAPTER PATTERN (ANTI IMPORT CYCLE) ---
-// Adapter ini menjembatani Blockchain Core dengan gRPC Service
-// tanpa membuat service mengimpor package main.
+// -------------------------------------------------------------
+// ADAPTER LOKAL (Penghubung Blockchain -> gRPC Service)
+// -------------------------------------------------------------
+
+// ChainAdapter membungkus Blockchain agar sesuai dengan interface di service
 type ChainAdapter struct {
 	Chain *blockchain.Blockchain
 }
 
-// Height mengembalikan tinggi blok saat ini
+// Height mengembalikan tinggi chain saat ini
 func (a *ChainAdapter) Height() uint64 {
-	// Pastikan method Height() ada di package blockchain Anda
 	return a.Chain.Height()
 }
 
-// GetBlockByHeight mengambil data blok berdasarkan tinggi
+// GetBlockByHeight implementasi interface: want (any, bool)
 func (a *ChainAdapter) GetBlockByHeight(height uint64) (any, bool) {
+	// a.Chain.GetBlockByHeight mengembalikan (*core.Block, error)
 	blk, err := a.Chain.GetBlockByHeight(height)
 	if err != nil {
 		return nil, false
 	}
+	// Kita return 'blk' langsung. Karena return type fungsi ini 'any',
+	// Go otomatis membungkus *core.Block menjadi any.
+	// Tidak perlu import 'core' di file ini.
 	return blk, true
 }
 
-// --- FUNGSI UTAMA ---
+// -------------------------------------------------------------
+// MAIN ENTRY POINT
+// -------------------------------------------------------------
 func main() {
-	// 1. Konfigurasi Argumen CLI
-	apiAddr := flag.String("api-addr", ":8080", "Port untuk REST API (Wallet & Health)")
-	grpcAddr := flag.String("grpc-addr", ":9090", "Port untuk gRPC Node Communication")
-	enableGRPC := flag.Bool("grpc", true, "Aktifkan gRPC Server")
+	// 1. Konfigurasi
+	apiAddr := flag.String("api-addr", ":8081", "API Port (Locked for Wallet)")
+	grpcAddr := flag.String("grpc-addr", ":9090", "gRPC Port")
+	dbPath := flag.String("db-path", "./data/quantum_db", "Path Database BadgerDB")
+	
+	// Alamat Sovereign (Pemilik Genesis)
+	sovereignAddr := "0x1d58599424f1159828236111f1f9e83063f66345091a99540c4989679269491a"
 	flag.Parse()
 
-	fmt.Println("\n==================================================")
-	fmt.Println("   🚀 QUANTUMPAY SOVEREIGN NODE v4.5 STARTING    ")
-	fmt.Println("==================================================")
+	fmt.Println("🌟 QUANTUMPAY MAINNET: DAWN OF SOVEREIGNTY")
+	fmt.Printf("👑 Sovereign Address: %s\n", sovereignAddr)
 
-	// 2. Inisialisasi Core System
-	log.Println("⚙️  [CORE] Initializing Blockchain & Mempool...")
-	chain := blockchain.NewBlockchain() // Load database blok lokal
-	mp := mempool.New()                 // Siapkan kolam transaksi memori
-	eng := engine.New(chain, mp)        // Siapkan mesin konsensus
-
-	// 3. Jalankan gRPC Server (Background Goroutine)
-	if *enableGRPC {
-		go func() {
-			// Hubungkan Adapter ke Service
-			adapter := &ChainAdapter{Chain: chain}
-			svc := service.NewNodeService(adapter)
-			
-			// Start Server
-			srv := server.NewServer(*grpcAddr)
-			log.Printf("📡 [gRPC] Server Listening on %s", *grpcAddr)
-			if err := srv.Start(svc); err != nil {
-				log.Printf("🔥 [gRPC] Failed to start: %v", err)
-			}
-		}()
+	// 2. Init WorldState (BadgerDB Persistence)
+	ws, err := state.NewWorldState(*dbPath)
+	if err != nil {
+		log.Fatalf("❌ Gagal inisialisasi BadgerDB: %v", err)
 	}
+	defer ws.Close() // Pastikan DB tertutup rapi saat exit
 
-	// 4. Jalankan REST API Server (Background Goroutine)
-	// INI YANG MENGAKTIFKAN "Create Wallet" (PQC) DAN "Health Check"
+	// 3. Init Blockchain
+	// Memasukkan WorldState dan Alamat Founder untuk Genesis
+	chain := blockchain.NewBlockchain(ws, sovereignAddr)
+	
+	// --- AMBIL GENESIS HASH ---
+	// Variabel 'genesisBlock' otomatis terdeteksi sebagai *core.Block
+	// karena return value dari chain.GetBlockByHeight.
+	genesisBlock, err := chain.GetBlockByHeight(0)
+	if err != nil {
+		log.Fatalf("❌ CRITICAL: Genesis block not found in BadgerDB!")
+	}
+	genesisHash := genesisBlock.Hash
+	
+	fmt.Printf("🏛️  GENESIS HASH SECURED: %x\n", genesisHash)
+	fmt.Println("--------------------------------------------------")
+
+	// 4. Init Engine & Mempool
+	mp := mempool.New()
+	eng := engine.New(chain, mp)
+
+	// 5. Jalankan gRPC Server (Port 9090)
 	go func() {
-		// Kita menggunakan konfigurasi dari package internal/api
-		cfg := &api.ServerConfig{Port: *apiAddr}
+		// Gunakan Adapter Lokal
+		adapter := &ChainAdapter{Chain: chain}
 		
-		log.Printf("🌐 [API] Starting REST Server on %s...", *apiAddr)
-		// Fungsi ini memblokir, jadi harus di dalam goroutine
-		api.StartServer(cfg)
+		// Injeksi adapter ke Service
+		svc := service.NewNodeService(adapter)
+		
+		// Start Server
+		srv := server.NewServer(*grpcAddr)
+		log.Printf("📡 [gRPC] Gateway Open: %s", *grpcAddr)
+		srv.Start(svc)
 	}()
 
-	// 5. Jalankan Mining Loop / Block Production (Simulasi)
+	// 6. Jalankan API Server (Port 8081)
 	go func() {
-		log.Println("⛏️  [MINER] Consensus Engine Started")
-		for {
-			// Simulasi block time 5 detik
-			time.Sleep(5 * time.Second)
+		cfg := &api.ServerConfig{Port: *apiAddr}
+		log.Printf("🌐 [API] Interface Live: %s", *apiAddr)
+		api.StartServer(cfg) 
+	}()
 
-			// Coba produksi blok baru
+	// 7. Mining Loop (The Pulse of the Network)
+	go func() {
+		log.Println("⛏️  [MINER] Consensus Engine Activated")
+		for {
+			// ProduceBlock dari engine baru
 			blk, err := eng.ProduceBlock()
-			if err == nil {
-				// Log sukses mining
-				log.Printf("📦 [MINED] New Block #%d | Hash: %x | Tx: %d", 
-					blk.Height, blk.Hash[:4], len(blk.Transactions))
-			} else {
-				// Log jika idle (misal tidak ada transaksi)
-				// log.Println("💤 [MINER] Idle...") 
+			
+			if err == nil && blk != nil {
+				// Akses Height lewat Header
+				log.Printf("📦 Block Minted #%d | Hash: %x | Tx: %d", 
+					blk.Header.Height, 
+					blk.Hash[:4], 
+					len(blk.Transactions))
 			}
+			
+			// Jeda antar blok
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
-	// 6. Graceful Shutdown (Mencegah aplikasi langsung mati)
-	// Menunggu sinyal CTRL+C dari terminal
+	// 8. Graceful Shutdown (Agar data BadgerDB tidak korup)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	
-	// Blokir main thread di sini sampai ada sinyal berhenti
 	<-quit
-
-	fmt.Println("\n🛑 [SHUTDOWN] Saving data and stopping node...")
-	
-	// Tambahkan logika penyimpanan state terakhir di sini jika perlu
-	// chain.Close()
-	
-	fmt.Println("👋 QuantumPay Node Stopped. Goodbye!")
+	fmt.Println("\n🛑 Node Safely Hibernating... Flushing data to SSD.")
 }
